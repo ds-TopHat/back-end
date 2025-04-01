@@ -1,8 +1,8 @@
-package com.ultimate.mathfusion.services;
+package com.mathfusion.domain.user.service;
 
-import com.ultimate.mathfusion.dto.AddUserRequest;
-import com.ultimate.mathfusion.entity.User;
-import com.ultimate.mathfusion.repository.UserRepository;
+import com.mathfusion.domain.user.dto.AddUserRequest;
+import com.mathfusion.domain.user.entity.User;
+import com.mathfusion.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;

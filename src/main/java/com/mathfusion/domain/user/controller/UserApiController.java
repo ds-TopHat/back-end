@@ -1,7 +1,7 @@
-package com.ultimate.mathfusion.controllers;
+package com.mathfusion.domain.user.controller;
 
-import com.ultimate.mathfusion.dto.AddUserRequest;
-import com.ultimate.mathfusion.services.UserService;
+import com.mathfusion.domain.user.dto.AddUserRequest;
+import com.mathfusion.domain.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

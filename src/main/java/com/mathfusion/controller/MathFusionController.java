@@ -1,4 +1,4 @@
-package com.ultimate.mathfusion.controllers;
+package com.mathfusion.controller;
 
 import org.springframework.web.bind.annotation.RestController;
 

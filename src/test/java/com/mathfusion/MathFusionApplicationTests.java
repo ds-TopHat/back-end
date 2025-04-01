@@ -1,4 +1,4 @@
-package com.ultimate.mathfusion;
+package com.mathfusion;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

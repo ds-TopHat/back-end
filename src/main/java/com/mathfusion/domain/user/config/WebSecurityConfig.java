@@ -1,6 +1,6 @@
-package com.ultimate.mathfusion.config;
+package com.mathfusion.domain.user.config;
 
-import com.ultimate.mathfusion.services.UserDetailService;
+import com.mathfusion.domain.user.service.UserDetailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

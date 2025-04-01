@@ -1,7 +1,8 @@
-package com.ultimate.mathfusion.repository;
+package com.mathfusion.domain.user.repository;
 
+import com.mathfusion.domain.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
-import com.ultimate.mathfusion.entity.User;
+
 import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
 

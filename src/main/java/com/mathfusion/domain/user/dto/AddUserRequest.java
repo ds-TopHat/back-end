@@ -1,4 +1,4 @@
-package com.ultimate.mathfusion.dto;
+package com.mathfusion.domain.user.dto;
 
 import lombok.Getter;
 import lombok.Setter;

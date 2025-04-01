@@ -1,6 +1,6 @@
-package com.ultimate.mathfusion.services;
+package com.mathfusion.domain.user.service;
 
-import com.ultimate.mathfusion.repository.UserRepository;
+import com.mathfusion.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

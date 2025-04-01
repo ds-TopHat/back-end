@@ -1,4 +1,4 @@
-package com.ultimate.mathfusion.entity;
+package com.mathfusion.domain.user.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
