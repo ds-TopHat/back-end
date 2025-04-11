@@ -1,4 +1,5 @@
 package com.mathfusion.domain.user.entity;
+import jakarta.persistence.Entity; // ← 이거여야 합니다!
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;

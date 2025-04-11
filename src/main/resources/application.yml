@@ -1,8 +1,25 @@
 spring:
-  datasource: # 데이터베이스 정보 추가
-    url: jdbc:h2:mem:testdb
-    username: sa
+  datasource:
+    url: jdbc:mysql://localhost:3306/mathfusion?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: root  # ← 본인 DB 사용자명
+    password: sk1028512!  # ← 본인 비밀번호
+    driver-class-name: com.mysql.cj.jdbc.Driver
 
-  h2: # H2 콘솔 활성화
+  jpa:
+    hibernate:
+      ddl-auto: update  # 또는 create, none 등 (개발 환경에 따라)
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+    show-sql: true
+    # 배포할때는 fasle설정
+    open-in-view: false
+
+  h2:  #이제 H2 안 쓸 거니 필요 없나?
     console:
-      enabled: true
+      enabled: false
+
+  logging:
+    level:
+      org.hibernate.sql: debug
+
