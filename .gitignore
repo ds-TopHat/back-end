@@ -8,6 +8,9 @@ build/
 # application.yml파일 무시
 application.yml
 
+# querydsl 무시
+/src/main/generated
+
 ### STS ###
 .apt_generated
 .classpath
