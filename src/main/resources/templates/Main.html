@@ -4,13 +4,72 @@
     <meta charset="UTF-8">
     <title>Article List</title>
     <link rel="stylesheet" href="/css/styles.css">
+    <script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML"></script>
 </head>
 <body>
-<h1>Article List</h1>
+<h1>Qwen VL Test</h1>
+<div>
+    <label for="imageUrl">이미지 URL:</label>
+    <input type="text" id="imageUrl" name="imageUrl" placeholder="이미지 주소를 입력하세요">
+</div>
+<div>
+    <button type="button" onclick="updateImage()">분석하기</button>
+</div>
+<div>
+    <img id="previewImage" src="" alt="이미지 미리보기" style="max-width: 300px; display: none; margin-top: 10px;">
+</div>
+<div>
+    <h3>결과 JSON:</h3>
+    <pre id="jsonResult">{}</pre>
+</div>
 <div>
     <button type="button" class="btn btn-secondary" onclick="location.href='/logout'">로그아웃</button>
 </div>
 
-<script src="/js/article.js"></script>
+<script>
+    async function updateImage() {
+        const url = document.getElementById("imageUrl").value;
+        const img = document.getElementById("previewImage");
+
+        if (url) {
+            img.src = url;
+            img.style.display = "block";
+
+            try {
+                // Dashscope API 호출
+                const response = await fetch("/api/dashscope/analyze", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ imageUrl: url })
+                });
+
+                // 결과 처리
+                const data = await response.json();
+
+                // JSON을 보기 좋게 출력
+                document.getElementById("jsonResult").textContent = JSON.stringify(data, null, 2);
+
+                // MathJax를 사용하여 수식 렌더링
+                setTimeout(() => {
+                    // MathJax가 텍스트에 포함된 수식을 인식하고 렌더링
+                    MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+                }, 100);
+
+                // 실제로 수식을 텍스트 영역에서 변환해서 출력
+                const content = data.output.choices[0].message.content[0].text;
+                const formattedContent = content.replace(/\\\(/g, "<span class='latex'>").replace(/\\\)/g, "</span>");
+                document.getElementById("jsonResult").innerHTML = formattedContent;
+
+            } catch (err) {
+                document.getElementById("jsonResult").textContent = "에러: " + err;
+            }
+        } else {
+            document.getElementById("previewImage").style.display = "none";
+            document.getElementById("jsonResult").textContent = "{}";
+        }
+    }
+</script>
 </body>
 </html>

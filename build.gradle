@@ -46,6 +46,11 @@ dependencies {
     annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
     annotationProcessor "jakarta.annotation:jakarta.annotation-api"
     annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+
+    // Qwen (SLF4J 충돌 방지를 위해 slf4j-simple 제외)
+    implementation('com.alibaba:dashscope-sdk-java:2.19.0') {
+        exclude group: 'org.slf4j', module: 'slf4j-simple'
+    }
 }
 
 tasks.named('test') {
