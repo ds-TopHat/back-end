@@ -1,4 +1,4 @@
-package com.mathfusion.services;
+package com.mathfusion.service;
 
 import org.springframework.stereotype.Service;
 

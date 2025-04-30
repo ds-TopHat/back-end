@@ -32,7 +32,7 @@ public class WebSecurityConfig {
         return http
                 .csrf(csrf -> csrf.disable()) // CSRF 비활성화
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/signup", "/user",  "/api/dashscope/**").permitAll() // 인증 없이 접근 가능한 URL
+                        .requestMatchers("/login", "/signup", "/user",  "/api/dashscope/**", "/s3/presigned").permitAll() // 인증 없이 접근 가능한 URL
                         .anyRequest().authenticated() // 나머지는 인증 필요
                 )
                 .formLogin(form -> form
