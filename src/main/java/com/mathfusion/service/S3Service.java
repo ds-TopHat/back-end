@@ -7,8 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.net.URL;
 import java.util.Date;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -19,15 +19,25 @@ public class S3Service {
     @Value("${cloud.aws.s3.bucket-name}")
     private String bucketName;
 
-    public String generatePresignedUrl(String objectKey) {
-        // 유효 시간 (예: 5분)
-        Date expiration = new Date(System.currentTimeMillis() + 1000 * 60 * 5);
+    public Map<String, String> generateUploadAndDownloadUrls(String objectKey) {
+        Date expiration = new Date(System.currentTimeMillis() + 1000 * 60 * 50);
 
-        GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(bucketName, objectKey)
+        // 업로드용 Presigned URL (PUT)
+        GeneratePresignedUrlRequest uploadRequest = new GeneratePresignedUrlRequest(bucketName, objectKey)
                 .withMethod(HttpMethod.PUT)
                 .withExpiration(expiration);
+        String uploadUrl = amazonS3.generatePresignedUrl(uploadRequest).toString();
 
-        URL url = amazonS3.generatePresignedUrl(request);
-        return url.toString();
+        // 다운로드용 Presigned URL (GET)
+        GeneratePresignedUrlRequest downloadRequest = new GeneratePresignedUrlRequest(bucketName, objectKey)
+                .withMethod(HttpMethod.GET)
+                .withExpiration(expiration);
+        String downloadUrl = amazonS3.generatePresignedUrl(downloadRequest).toString();
+
+        return Map.of(
+                "uploadUrl", uploadUrl,
+                "downloadUrl", downloadUrl
+        );
     }
+
 }

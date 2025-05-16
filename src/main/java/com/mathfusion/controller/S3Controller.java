@@ -9,15 +9,15 @@ import java.util.Map;
 import java.util.UUID;
 
 @RestController
-@RequiredArgsConstructor
+@RequiredArgsConstructor // final이 붙거나 @NotNull 이 붙은 필드의 생성자를 자동 생성해주는 롬복 어노테이션
 public class S3Controller {
 
     private final S3Service s3Service;
 
     @GetMapping("/s3/presigned")
-    public Map<String, String> getPresignedUrl() {
+    public Map<String, String> getBothPresignedUrls() {
         String uuidFileName = UUID.randomUUID() + ".png";
-        String presignedUrl = s3Service.generatePresignedUrl("uploads/" + uuidFileName);
-        return Map.of("url", presignedUrl);
+        return s3Service.generateUploadAndDownloadUrls("uploads/" + uuidFileName);
     }
+
 }
