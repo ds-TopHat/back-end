@@ -1,5 +1,6 @@
 package com.mathfusion.service;
 
+import com.amazonaws.util.IOUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -10,52 +11,66 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Base64;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class UploadRelayService {
     private final RestTemplate restTemplate = new RestTemplate();
 
-    @Value("${postimg.api-key}")
+    @Value("${cloudinary.api-key}")
     private String apiKey;
 
-    public String uploadToPostimg(String presignedUrl) {
+    @Value("${cloudinary.api-secret}")
+    private String apiSecret;
+
+    @Value("${cloudinary.cloud-name}")
+    private String cloudName;
+
+    @Value("${cloudinary.upload-preset}")
+    private String uploadPreset; // 미리 생성한 unsigned preset
+
+    public String uploadToCloudinary(String presignedUrl) {
         try {
-            System.out.println("UploadRelayService 진입: presignedUrl = " + presignedUrl);
+            // 1. S3에서 이미지 다운로드 → base64로 변환
+            InputStream in = new URL(presignedUrl).openStream();
+            byte[] imageBytes = IOUtils.toByteArray(in);
+            String base64Image = Base64.getEncoder().encodeToString(imageBytes);
+            in.close();
 
+            //Cloudinary 업로드용 랜덤 파일 이름 생성
+            String filename = "qwen_" + UUID.randomUUID().toString().replace("-", "");
+
+            // 3. HTTP 요청 구성
             HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+            headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
-            MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-            body.add("key", apiKey);  // Postimages에서 발급받은 public API key
-            body.add("upload_url", presignedUrl);  // S3 Presigned URL 직접 업로드
+            MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+            body.add("file", "data:image/png;base64," + base64Image);
+            body.add("upload_preset", uploadPreset);
+            body.add("public_id", filename);  // 슬래시 없는 이름 강제 지정
 
-            HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
+            HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(body, headers);
+
             ResponseEntity<Map> response = restTemplate.postForEntity(
-                    "https://api.postimages.org/1/upload",
+                    "https://api.cloudinary.com/v1_1/" + cloudName + "/image/upload",
                     request,
                     Map.class
             );
 
-            System.out.println("postimages 응답 수신: " + response.getBody());
-
             Map<String, Object> responseBody = response.getBody();
-            if (responseBody == null || !responseBody.containsKey("url")) {
-                throw new RuntimeException("postimages 응답 없음 또는 형식 오류");
+            if (responseBody == null || !responseBody.containsKey("secure_url")) {
+                throw new RuntimeException("Cloudinary 응답 오류");
             }
 
-            String url = (String) responseBody.get("url");
-            if (url == null || url.isBlank()) {
-                throw new RuntimeException("postimages URL이 비어 있음");
-            }
-
-            System.out.println("최종 반환할 URL = " + url);
-            return url;
+            return (String) responseBody.get("secure_url");
 
         } catch (Exception e) {
-            System.out.println("UploadRelayService 예외 발생: " + e.getMessage());
-            e.printStackTrace();  // 전체 예외 로그 출력
-            throw new RuntimeException("postimages 업로드 실패", e);
+            e.printStackTrace();
+            throw new RuntimeException("Cloudinary 업로드 실패", e);
         }
     }
 }
