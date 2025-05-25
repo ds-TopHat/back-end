@@ -8,6 +8,9 @@ build/
 # application.yml파일 무시
 application.yml
 
+# .gitignore에 추가
+**/.env
+
 # querydsl 무시
 /src/main/generated
 
