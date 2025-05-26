@@ -30,7 +30,7 @@ public class QwenController {
             System.out.println("현재 Qwen에 전달되는 URL: " + publicUrl);
             System.out.println("Presigned URL 확인: " + downloadUrl);
 
-            String result = qwenService.runMultiModalExample(publicUrl);
+            String result = qwenService.callQwen25(publicUrl);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
