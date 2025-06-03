@@ -28,22 +28,26 @@ public class QwenService {
         // https://github.com/QwenLM/Qwen2.5-VL/issues/174
         String body = """
         {
-          "model": "qwen2.5-vl-7b-instruct",
-          "messages": [
+        "model": "qwen2.5-vl-7b-instruct",
+        "messages": [
             {
-              "role": "user",
-              "content": [
+            "role": "system",
+            "content": "You are an assistant that extracts and describes all math content from images. This includes equations, symbols, diagrams, graphs, and multiple choice options. Do not solve the problem. Describe everything in detail and use complete sentences."
+            },
+            {
+            "role": "user",
+            "content": [
                 {
-                  "type": "image_url",
-                  "image_url": { "url": "%s" }
+                "type": "image_url",
+                "image_url": { "url": "%s" }
                 },
                 {
-                  "type": "text",
-                  "text": "Please convert the math problem in the image into clear and complete text."
+                "type": "text",
+                "text": "Please convert the math problem in the image into clear and complete text, including all diagrams, graphs, and choices."
                 }
-              ]
+            ]
             }
-          ]
+        ]
         }
         """.formatted(imageUrl);
 
