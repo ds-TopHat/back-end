@@ -22,6 +22,7 @@ public class DeepSeekController {
     @Operation(summary = "수학 문제 풀이 요청", description = "질문을 딥시크에 전달해 수학 문제를 풉니다.")
     public ResponseEntity<String> solve(@RequestBody Map<String, String> payload) {
         String question = payload.get("question");
+        System.out.println("DeepSeekController solve() 진입");
         String response = deepSeekService.sendPrompt(question);
         return ResponseEntity.ok(response);
     }

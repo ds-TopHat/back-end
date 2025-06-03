@@ -59,6 +59,8 @@ dependencies {
 
     //deepseek-springboot 연동
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    //Liquibase 관련 의존성 누락
+    implementation 'org.liquibase:liquibase-core'
 }
 
 tasks.named('test') {

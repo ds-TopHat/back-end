@@ -19,6 +19,7 @@ public class QwenService {
     private final RestTemplate restTemplate = new RestTemplate();
 
     public String callQwen25(String imageUrl) {
+        // https://www.alibabacloud.com/help/en/model-studio/compatibility-of-openai-with-dashscope
         String endpoint = "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions";
 
         HttpHeaders headers = new HttpHeaders();
