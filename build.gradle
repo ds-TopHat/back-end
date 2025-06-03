@@ -56,6 +56,9 @@ dependencies {
 
     // Springdoc(OpenAPI 3) 사용 시
     implementation 'org.springdoc:springdoc-openapi-ui:1.7.0'
+
+    //deepseek-springboot 연동
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
 }
 
 tasks.named('test') {
