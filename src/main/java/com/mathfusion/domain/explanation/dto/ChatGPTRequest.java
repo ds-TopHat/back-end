@@ -17,7 +17,7 @@ public class ChatGPTRequest {
     public ChatGPTRequest(String model, String prompt){
         this.model = model;
         this.messages = new ArrayList<ChatMessage>();
-        this.messages.add(new ChatMessage(prompt));
+        this.messages.add(new ChatMessage("user",prompt));
 
         this.n = 1;
     }

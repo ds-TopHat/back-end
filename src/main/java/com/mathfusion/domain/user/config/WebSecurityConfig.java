@@ -1,6 +1,7 @@
 package com.mathfusion.domain.user.config;
 
 import com.mathfusion.domain.user.service.UserDetailService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,7 +34,7 @@ public class WebSecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable) // CSRF 비활성화
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/signup", "/user",  "/api/dashscope/**", "/s3/presigned").permitAll() // 인증 없이 접근 가능한 URL
+                        .requestMatchers("/login", "/signup", "/user",  "/api/dashscope/**", "/s3/presigned", "/api/gpt/**").permitAll() // 인증 없이 접근 가능한 URL
                         .anyRequest().authenticated() // 나머지는 인증 필요
                 )
                 .formLogin(form -> form
@@ -43,6 +44,14 @@ public class WebSecurityConfig {
                 .logout(logout -> logout
                         .logoutSuccessUrl("/login") // 로그아웃 성공 시 이동할 URL
                         .invalidateHttpSession(true) // 세션 무효화
+                )
+                // 정상적으로 401 Unauthorized JSON 응답
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setContentType("application/json");
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.getWriter().write("{\"error\": \"Unauthorized\"}");
+                        })
                 )
                 .build();
     }
