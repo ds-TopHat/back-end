@@ -14,11 +14,11 @@ public class ChatGPTRequest {
     private List<ChatMessage> messages;
     private int n;
 
-    public ChatGPTRequest(String model, String prompt){
+    public ChatGPTRequest(String model, String systemPrompt, String userPrompt) {
         this.model = model;
-        this.messages = new ArrayList<ChatMessage>();
-        this.messages.add(new ChatMessage("user",prompt));
-
+        this.messages = new ArrayList<>();
+        this.messages.add(new ChatMessage("system", systemPrompt)); // 시스템이 받는 프롬프트
+        this.messages.add(new ChatMessage("user", userPrompt)); // 사용자가 받는 프롬프트
         this.n = 1;
     }
 }

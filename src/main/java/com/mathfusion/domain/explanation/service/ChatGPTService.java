@@ -23,23 +23,27 @@ public class ChatGPTService {
     @Value("${openai.url}")
     private String url;
 
-    public String prompt(String prompt){
-
+    public String prompt(String englishMathContent) {
         HttpHeaders headers = chatGPTConfig.httpHeaders();
 
-        ChatGPTRequest chatGPTRequest = new ChatGPTRequest(model, prompt);
+        String systemPrompt = "다음 영어 수학 풀이 내용을 보고, Step 1~N까지의 각 단계 설명만 추출해 주세요.\n" +
+                "각 step을 자연스러운 한국어로 번역해 주세요.\n" +
+                "HTML 해시태그는 제거해 주세요.";
+        String userPrompt = String.format("""
+        \"\"\"%s\"\"\"
+        """, englishMathContent);
 
+        ChatGPTRequest chatGPTRequest = new ChatGPTRequest(model, systemPrompt, userPrompt);
         HttpEntity<ChatGPTRequest> requestHttpEntity = new HttpEntity<>(chatGPTRequest, headers);
 
         ChatGPTResponse response = restTemplate.postForObject(url, requestHttpEntity, ChatGPTResponse.class);
 
-        if(response == null || response.getChoices() == null || response.getChoices().isEmpty()){
-            throw new RuntimeException();
+        if (response == null || response.getChoices() == null || response.getChoices().isEmpty()) {
+            throw new RuntimeException("GPT 응답이 비어 있습니다.");
         }
+
         return response.getChoices().get(0).getMessage().getContent();
     }
-
-
 }
 
 // 참고자료
