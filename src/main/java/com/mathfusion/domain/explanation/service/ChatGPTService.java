@@ -26,9 +26,12 @@ public class ChatGPTService {
     public String prompt(String englishMathContent) {
         HttpHeaders headers = chatGPTConfig.httpHeaders();
 
-        String systemPrompt = "다음 영어 수학 풀이 내용을 보고, Step 1~N까지의 각 단계 설명만 추출해 주세요.\n" +
+        String systemPrompt = "다음 영어 수학 풀이 내용을 보고, Step 1~N까지의 각 단계 설명을 추출해 주세요.\n" +
                 "각 step을 자연스러운 한국어로 번역해 주세요.\n" +
-                "HTML 해시태그는 제거해 주세요.";
+                "HTML 해시태그는 제거해 주세요.\n" +
+                "맨 위에 'json'이라는 단어도 빼주세요."+
+                "출력 형식은 JSON 배열로 해 주세요. 각 단계는 다음과 같이 표현합니다: [ { \"step 1\": \"...\" }, { \"step 2\": \"...\" }, ... ]\n" +
+                "그리고 마지막에는 반드시 다음 형식으로 정답을 배열 안에 포함시켜 주세요: { \"answer\": \"정답은 ab = 12입니다.\" }";
         String userPrompt = String.format("""
         \"\"\"%s\"\"\"
         """, englishMathContent);
