@@ -1,15 +1,13 @@
 package com.mathfusion.domain.deepseek.dto;
 
 public class DeepSeekResponse {
-    private String result;
+    private String response;
 
-    public DeepSeekResponse() {}
-
-    public String getResult() {
-        return result;
+    public String getResponse() {
+        return response;
     }
 
-    public void setResult(String result) {
-        this.result = result;
+    public void setResponse(String response) {
+        this.response = response;
     }
 }
