@@ -17,7 +17,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/ai")
 @RequiredArgsConstructor
-public class QwenController {
+public class AiController {
 
     private final QwenService qwenService;
     private final UploadRelayService uploadRelayService;
