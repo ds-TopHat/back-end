@@ -1,8 +1,8 @@
-package com.mathfusion.domain.explanation.service;
+package com.mathfusion.domain.ai.service;
 
-import com.mathfusion.domain.explanation.config.ChatGPTConfig;
-import com.mathfusion.domain.explanation.dto.ChatGPTRequest;
-import com.mathfusion.domain.explanation.dto.ChatGPTResponse;
+import com.mathfusion.domain.ai.config.ChatGPTConfig;
+import com.mathfusion.domain.ai.dto.ChatGPTRequest;
+import com.mathfusion.domain.ai.dto.ChatGPTResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;

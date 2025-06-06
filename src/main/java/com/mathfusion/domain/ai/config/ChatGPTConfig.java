@@ -1,4 +1,4 @@
-package com.mathfusion.domain.explanation.config;
+package com.mathfusion.domain.ai.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
