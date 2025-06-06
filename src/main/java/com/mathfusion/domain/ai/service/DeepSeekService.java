@@ -1,4 +1,4 @@
-package com.mathfusion.domain.deepseek.service;
+package com.mathfusion.domain.ai.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
