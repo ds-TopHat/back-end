@@ -29,26 +29,26 @@ public class QwenService {
         // https://github.com/QwenLM/Qwen2.5-VL/issues/174
         String body = """
         {
-        "model": "qwen2.5-vl-7b-instruct",
-        "messages": [
+          "model": "qwen2.5-vl-7b-instruct",
+          "messages": [
             {
-            "role": "system",
-            "content": "You are an assistant that extracts and describes all math content from images. This includes equations, symbols, diagrams, graphs, and multiple choice options. Do not solve the problem. Describe everything in detail and use complete sentences."
+              "role": "system",
+              "content": "You are a helpful assistant that extracts math problems from images and rewrites them in clear, complete, and grammatically correct English. Do not solve the problem. Only describe the math problem exactly as shown in the image. All output must be a single line of plain English text, with no bullet points, no Markdown, no LaTeX, and no line breaks. The text should be formatted to fit inside a JSON string as a value for the 'question' key."
             },
             {
-            "role": "user",
-            "content": [
+              "role": "user",
+              "content": [
                 {
-                "type": "image_url",
-                "image_url": { "url": "%s" }
+                  "type": "image_url",
+                  "image_url": { "url": "%s" }
                 },
                 {
-                "type": "text",
-                "text": "Please convert the math problem in the image into clear and complete text, including all diagrams, graphs, and choices."
+                  "type": "text",
+                  "text": "Convert the math problem in the image into a single line of English text that is suitable for JSON input."
                 }
-            ]
+              ]
             }
-        ]
+          ]
         }
         """.formatted(imageUrl);
 
