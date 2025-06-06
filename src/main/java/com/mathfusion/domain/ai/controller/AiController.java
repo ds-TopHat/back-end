@@ -1,5 +1,7 @@
 package com.mathfusion.domain.ai.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mathfusion.domain.ai.service.DeepSeekService;
 import com.mathfusion.domain.ai.service.ChatGPTService;
 import com.mathfusion.domain.ai.service.QwenService;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -37,8 +40,20 @@ public class AiController {
             String deepseekResult = deepSeekService.sendPrompt(qwenResult);
             String gptResult = chatGPTService.prompt(deepseekResult);
 
+            ObjectMapper mapper = new ObjectMapper();
+            String cleanedResponse = gptResult;
 
-            return ResponseEntity.ok(gptResult);
+            // 마크다운(````json`)이 포함되어 있으면 제거
+            if (gptResult.contains("```")) {
+                cleanedResponse = gptResult.replaceAll("```json|```", "").trim();
+            }
+
+            List<Map<String, String>> result = mapper.readValue(
+                    cleanedResponse,
+                    new TypeReference<>() {}
+            );
+
+            return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Qwen 처리 실패 : " + e.getMessage());
