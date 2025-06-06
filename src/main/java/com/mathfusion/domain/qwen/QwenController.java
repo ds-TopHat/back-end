@@ -1,7 +1,6 @@
 package com.mathfusion.domain.qwen;
 
-import com.mathfusion.service.S3Service;
-import com.mathfusion.service.UploadRelayService;
+import com.mathfusion.s3.S3Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
