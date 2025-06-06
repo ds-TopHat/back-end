@@ -1,8 +1,8 @@
-package com.mathfusion.domain.qwen;
+package com.mathfusion.domain.ai.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mathfusion.domain.qwen.dto.QwenResponse;
+import com.mathfusion.domain.ai.dto.QwenResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
