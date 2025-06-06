@@ -1,4 +1,4 @@
-package com.mathfusion.domain.qwen;
+package com.mathfusion.domain.ai.service;
 
 import com.amazonaws.util.IOUtils;
 import org.springframework.beans.factory.annotation.Value;

@@ -1,4 +1,4 @@
-package com.mathfusion.domain.explanation.dto;
+package com.mathfusion.domain.ai.dto;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

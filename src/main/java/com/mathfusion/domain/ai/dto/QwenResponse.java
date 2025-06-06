@@ -1,4 +1,4 @@
-package com.mathfusion.domain.qwen.dto;
+package com.mathfusion.domain.ai.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;

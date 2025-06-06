@@ -33,8 +33,7 @@ public class WebSecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable) // CSRF 비활성화
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/signup", "/user",  "/api/dashscope/**", "/s3/presigned","/api/integrated/**", "/solve").permitAll() // 인증 없이 접근 가능한 URL
-                        .anyRequest().authenticated() // 나머지는 인증 필요
+                        .anyRequest().permitAll()  // 2025.06.06 데모 기준 - 모든 요청 인증 없이 허용 (로그인 없으므로)
                 )
                 .formLogin(form -> form
                         .loginPage("/login") // 사용자 정의 로그인 페이지
