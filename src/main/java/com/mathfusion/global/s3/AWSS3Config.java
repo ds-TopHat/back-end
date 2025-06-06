@@ -1,4 +1,4 @@
-package com.mathfusion.s3;
+package com.mathfusion.global.s3;
 
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;

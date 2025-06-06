@@ -1,4 +1,4 @@
-package com.mathfusion.s3;
+package com.mathfusion.global.s3;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
