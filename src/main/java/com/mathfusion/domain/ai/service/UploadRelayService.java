@@ -61,6 +61,7 @@ public class UploadRelayService {
                     Map.class
             );
 
+
             Map<String, Object> responseBody = response.getBody();
             if (responseBody == null || !responseBody.containsKey("secure_url")) {
                 throw new RuntimeException("Cloudinary 응답 오류");
