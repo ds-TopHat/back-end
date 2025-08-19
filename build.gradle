@@ -60,6 +60,24 @@ dependencies {
 
     //deepseek-springboot 연동
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+    //서버 배포(bean validation)
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    //이메일 인증
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+
+    //회원탈퇴 - jwt
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5' // JSON (jackson) parser
+
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+    implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
+
+
 }
 
 tasks.named('test') {
