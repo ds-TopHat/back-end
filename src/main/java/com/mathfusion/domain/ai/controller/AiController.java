@@ -6,6 +6,8 @@ import com.mathfusion.domain.ai.service.DeepSeekService;
 import com.mathfusion.domain.ai.service.ChatGPTService;
 import com.mathfusion.domain.ai.service.QwenService;
 import com.mathfusion.domain.ai.service.UploadRelayService;
+import com.mathfusion.domain.question.entity.Question;
+import com.mathfusion.domain.question.service.QuestionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +28,7 @@ public class AiController {
     private final UploadRelayService uploadRelayService;
     private final DeepSeekService deepSeekService;
     private final ChatGPTService chatGPTService;
+    private final QuestionService questionService;
 
     @PostMapping("/chat")
     public ResponseEntity<?> qwenToDeepseekAndGpt(@RequestBody Map<String, String> body) {
@@ -53,10 +56,12 @@ public class AiController {
                     new TypeReference<>() {}
             );
 
+            Question savedQuestion = questionService.saveAiAnswer(gptResult);
+
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Qwen 처리 실패 : " + e.getMessage());
+                    .body("Ai 처리 실패 : " + e.getMessage());
         }
     }
 
