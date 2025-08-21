@@ -3,12 +3,12 @@ package com.mathfusion.global.s3;
 import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
+import com.mathfusion.global.s3.dto.PresignedPair;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -19,7 +19,8 @@ public class S3Service {
     @Value("${cloud.aws.s3.bucket-name}")
     private String bucketName;
 
-    public Map<String, String> generateUploadAndDownloadUrls(String objectKey) {
+    // Map -> dto방식으로 반환
+    public PresignedPair generateUploadAndDownloadUrls(String objectKey) {
         Date expiration = new Date(System.currentTimeMillis() + 1000 * 60 * 50);
 
         // 업로드용 Presigned URL (PUT)
@@ -34,10 +35,7 @@ public class S3Service {
                 .withExpiration(expiration);
         String downloadUrl = amazonS3.generatePresignedUrl(downloadRequest).toString();
 
-        return Map.of(
-                "uploadUrl", uploadUrl,
-                "downloadUrl", downloadUrl
-        );
+        return new PresignedPair(uploadUrl, downloadUrl);
     }
 
 }
