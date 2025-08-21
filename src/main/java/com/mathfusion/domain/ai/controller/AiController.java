@@ -32,9 +32,30 @@ public class AiController {
     private final ChatGPTService chatGPTService;
     private final QuestionService questionService;
 
-    @Operation(summary = "ai에 수학문제 풀이 요청", description = "한 번 요청 넣었을 때 네트워크 탭에서 `200` & `pending`이라고 뜨면 **ai 모델에 요청 들어간 것**이므로 **응답 받기 전까지는 추가 요청 넣지 말아야 함!**\n" +
-            "모델이 한 번 응답 생성할 때 대략 1~3분 정도 걸리는데, 응답 받기도 전에 추가 요청 계속 넣으면 답변 받기까지 시간 오래 걸릴 수 있으므로!\n" +
-    "※ downloadUrl 또는 downloadUrls 중 하나는 반드시 필요합니다.")
+    @Operation(
+            summary = "AI에 수학문제 풀이 요청",
+            description =
+                    "요청 시 반드시 `downloadUrls` 배열을 사용해야 합니다.\n\n" +
+                            "문제 한 개만 넣을 경우:\n" +
+                            "```json\n" +
+                            "{\n" +
+                            "  \"downloadUrls\": [\n" +
+                            "    \"문제_이미지_URL\"\n" +
+                            "  ]\n" +
+                            "}\n" +
+                            "```\n\n" +
+                            "문제와 사용자 풀이 이미지를 함께 넣을 경우:\n" +
+                            "```json\n" +
+                            "{\n" +
+                            "  \"downloadUrls\": [\n" +
+                            "    \"문제_이미지_URL\",\n" +
+                            "    \"사용자풀이_이미지_URL\"\n" +
+                            "  ]\n" +
+                            "}\n" +
+                            "```\n\n" +
+                            "한 번 요청을 넣으면 네트워크 탭에 `200`과 `pending` 상태가 표시됩니다. " +
+                            "AI 모델 응답이 오기까지 약 1~3분 정도 소요될 수 있으므로, 응답을 받기 전에 추가 요청을 보내면 처리 지연이 발생할 수 있습니다."
+    )
     @PostMapping("/chat")
     public ResponseEntity<?> qwenToDeepseekAndGpt(@RequestBody ChatRequest req) {
         try {

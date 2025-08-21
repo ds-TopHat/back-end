@@ -48,7 +48,8 @@ public class WebSecurityConfig {
                                 "/favicon.ico",
                                 "/default-ui.css",
                                 "/health",
-                                "/s3/presigned"
+                                "/s3/presigned",
+                                "/api/v0/ai/chat"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
