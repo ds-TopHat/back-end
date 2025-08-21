@@ -1,6 +1,7 @@
 package com.mathfusion.global.s3;
 
 import com.mathfusion.global.s3.dto.PresignedBatchResponse;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -18,6 +19,7 @@ public class S3Controller {
 
     // 문제 1장 반환 : /s3/presigned
     // 문제 1장 + 사용자 문제풀이 1장 : /s3/presigned?count=2
+    @Operation(summary = "이미지 업로드 할 s3 url 받아오기", description = "문제 1장 : /s3/presigned,     " + "문제 1장 + 사용자 문제풀이 1장 : /s3/presigned?count=2")
     @GetMapping("/s3/presigned")
     public PresignedBatchResponse getPresignedUrls(
             @RequestParam(name = "count", defaultValue = "1") int count
