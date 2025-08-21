@@ -27,14 +27,14 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
 
 
         //db 저장
-        EmailVerification verification = EmailVerification.builder()
+        EmailVerification emailVerification = EmailVerification.builder()
                 .email(email)
                 .code(code)
                 .expiredTime(LocalDateTime.now().plusMinutes(5)) //만료 시간 5분
                 .verified(false)
                 .build();
 
-        emailVerificationRepository.save(verification);
+        emailVerificationRepository.save(emailVerification);
 
 
         //실제 이메일 발송
@@ -57,21 +57,21 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
 
     @Override
     public EmailVerificationResponse.VerifyCode verifyCode(String email, String code){
-      EmailVerification verification = emailVerificationRepository.findByEmailAndCode(email,code)
+      EmailVerification emailVerification = emailVerificationRepository.findByEmailAndCode(email,code)
               .orElseThrow(()-> new EmailException(EmailErrorCode.INVALID_CODE));
 
       //예외처리
-      if (verification.isVerified()){
+      if (emailVerification.isVerified()){
           throw new EmailException(EmailErrorCode.ALREADY_VERIFIED);
       }
 
-      if (verification.getExpiredTime().isBefore(LocalDateTime.now())){
+      if (emailVerification.getExpiredTime().isBefore(LocalDateTime.now())){
           throw new EmailException(EmailErrorCode.EXPIRED);
       }
 
       //검증 완료 처리
-      verification.setVerified(true);
-      emailVerificationRepository.save(verification);
+        emailVerification.setVerified(true);
+      emailVerificationRepository.save(emailVerification);
 
       return EmailVerificationResponse.VerifyCode.builder()
               .success(true)
