@@ -8,6 +8,7 @@ import com.mathfusion.domain.ai.service.DeepSeekService;
 import com.mathfusion.domain.ai.service.QwenService;
 import com.mathfusion.domain.ai.service.UploadRelayService;
 import com.mathfusion.domain.question.service.QuestionService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/ai")
+@RequestMapping("/api/v0/ai")
 @RequiredArgsConstructor
 public class AiController {
 
@@ -31,6 +32,9 @@ public class AiController {
     private final ChatGPTService chatGPTService;
     private final QuestionService questionService;
 
+    @Operation(summary = "ai에 수학문제 풀이 요청", description = "한 번 요청 넣었을 때 네트워크 탭에서 `200` & `pending`이라고 뜨면 **ai 모델에 요청 들어간 것**이므로 **응답 받기 전까지는 추가 요청 넣지 말아야 함!**\n" +
+            "모델이 한 번 응답 생성할 때 대략 1~3분 정도 걸리는데, 응답 받기도 전에 추가 요청 계속 넣으면 답변 받기까지 시간 오래 걸릴 수 있으므로!\n" +
+    "※ downloadUrl 또는 downloadUrls 중 하나는 반드시 필요합니다.")
     @PostMapping("/chat")
     public ResponseEntity<?> qwenToDeepseekAndGpt(@RequestBody ChatRequest req) {
         try {
