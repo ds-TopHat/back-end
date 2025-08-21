@@ -38,7 +38,8 @@ public class WebSecurityConfig {
                                 "/api/v0/users/login",
                                 "/api/v0/users/delete",
                                 "/api/v0/email-auth/**",
-                                "/static/**").permitAll()
+                                "/static/**",
+                                "/s3/presigned").permitAll()
                         .anyRequest().authenticated()  // 2025.08.14 데모 기준에서 수정
                 )
                 .httpBasic(AbstractHttpConfigurer::disable) // form 기반 -> REST API용 로그인
