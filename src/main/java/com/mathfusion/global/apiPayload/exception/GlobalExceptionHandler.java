@@ -1,8 +1,8 @@
-package com.mathfusion.domain.exception;
+package com.mathfusion.global.apiPayload.exception;
 
+import com.mathfusion.global.apiPayload.code.status.ErrorStatus;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
