@@ -14,8 +14,8 @@ public class Unit {
     @Column(name = "unit_id")
     private Long id;
 
-    @Column(name = "group", nullable = false)
-    private String group;
+    @Column(name = "group_name", nullable = false)
+    private String groupName;
 
     @Column(name = "type", nullable = false)
     private String type;
