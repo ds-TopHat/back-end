@@ -9,6 +9,7 @@ import java.util.List;
 @Setter
 public class ChatRequest {
     private List<String> downloadUrls;
+    private String s3Key;
 
     public List<String> normalized() {
         if (downloadUrls != null && !downloadUrls.isEmpty()) return downloadUrls;

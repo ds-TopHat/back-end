@@ -20,7 +20,7 @@ public class QuestionService {
     private final UnitRepository unitRepository;
     private final ObjectMapper mapper;
 
-    public Question saveAiAnswer(String gptResult) throws Exception {
+    public Question saveAiAnswer(String gptResult, String s3Key) throws Exception {
         // 1. Markdown 제거
         String cleanedResponse = gptResult.replaceAll("```json|```", "").trim();
 
@@ -47,6 +47,7 @@ public class QuestionService {
         Question question = Question.builder()
                 .aiAnswer(mapper.writeValueAsString(filtered))
                 .unit(unit)
+                .problemImage(s3Key)
                 .build();
 
         // 5. DB 저장
