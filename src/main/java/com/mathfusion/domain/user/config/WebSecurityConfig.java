@@ -57,7 +57,8 @@ public class WebSecurityConfig {
                                 "/default-ui.css",
                                 "/health",
                                 "/s3/presigned",
-                                "/api/v0/ai/chat"
+                                "/api/v0/ai/chat",
+                                "/api/v0/email-auth/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
