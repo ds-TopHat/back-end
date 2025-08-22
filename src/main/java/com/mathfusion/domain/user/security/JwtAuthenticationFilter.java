@@ -23,24 +23,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        String path = request.getRequestURI();
+        // 1. 요청 헤더에서 토큰 추출
+        String token = tokenProvider.extractToken(request.getHeader(HttpHeaders.AUTHORIZATION));
 
-        // 로그인, 회원가입, 이메일 인증 API는 JWT 검증 건너뛰기
-        if (path.startsWith("/api/v0/users/login") ||
-                path.startsWith("/api/v0/users/signup") ||
-                path.startsWith("/api/v0/email-auth/")) {
-
+        // 2. 토큰이 없으면 그냥 다음 필터 진행 (permitAll 된 URI는 SecurityConfig에서 허용)
+        if (token == null) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        String accessToken = tokenProvider.extractToken(request.getHeader(HttpHeaders.AUTHORIZATION));
-
-        if (accessToken != null && tokenProvider.validateToken(accessToken)) {
-            Authentication authentication = tokenProvider.getAuthentication(accessToken);
+        // 3. 토큰 검증 후 Authentication 등록
+        if (tokenProvider.validateToken(token)) {
+            Authentication authentication = tokenProvider.getAuthentication(token);
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
 
+        // 4. 다음 필터로 이동
         filterChain.doFilter(request, response);
     }
+
 }
