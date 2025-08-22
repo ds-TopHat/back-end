@@ -28,13 +28,16 @@ public class S3Controller {
 
         List<String> ups = new ArrayList<>();
         List<String> downs = new ArrayList<>();
+        String s3Key = null;
 
         for (int i = 0; i < count; i++) {
-            var pair = s3Service.generateUploadAndDownloadUrls("uploads/" + UUID.randomUUID() + ".png");
+            String objectKey = "uploads/" + UUID.randomUUID() + ".png";
+            var pair = s3Service.generateUploadAndDownloadUrls(objectKey);
             ups.add(pair.getUploadUrl());
             downs.add(pair.getDownloadUrl());
+            if (i == 0) s3Key = objectKey;
         }
 
-        return new PresignedBatchResponse(ups, downs);
+        return new PresignedBatchResponse(ups, downs, s3Key);
     }
 }

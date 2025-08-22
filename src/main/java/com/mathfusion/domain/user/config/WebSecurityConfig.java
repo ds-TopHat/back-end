@@ -53,12 +53,14 @@ public class WebSecurityConfig {
                                 "/v3/api-docs/**",
                                 "/swagger-ui.html",
                                 "/api/v0/users/**",
+                                "/api/v0/email-auth/**",
                                 "/error",
                                 "/favicon.ico",
                                 "/default-ui.css",
                                 "/health",
                                 "/s3/presigned",
-                                "/api/v0/ai/chat"
+                                "/api/v0/ai/chat",
+                                "/api/v0/email-auth/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

@@ -35,7 +35,7 @@ public class AiController {
     @Operation(
             summary = "AI에 수학문제 풀이 요청",
             description =
-                    "요청 시 반드시 `downloadUrls` 배열을 사용해야 합니다.\n\n" +
+                    "1. 요청 시 반드시 `downloadUrls` 배열을 사용해야 합니다.\n\n" +
                             "문제 한 개만 넣을 경우:\n" +
                             "```json\n" +
                             "{\n" +
@@ -53,8 +53,10 @@ public class AiController {
                             "  ]\n" +
                             "}\n" +
                             "```\n\n" +
-                            "한 번 요청을 넣으면 네트워크 탭에 `200`과 `pending` 상태가 표시됩니다. " +
-                            "AI 모델 응답이 오기까지 약 1~3분 정도 소요될 수 있으므로, 응답을 받기 전에 추가 요청을 보내면 처리 지연이 발생할 수 있습니다."
+                            "2. 한 번 요청을 넣으면 네트워크 탭에 `200`과 `pending` 상태가 표시됩니다. " +
+                            "AI 모델 응답이 오기까지 약 1~3분 정도 소요될 수 있으므로, 응답을 받기 전에 추가 요청을 보내면 처리 지연이 발생할 수 있습니다." +
+                            "\n\n" +
+                            "3. s3Key도 넣어주세요."
     )
     @PostMapping("/chat")
     public ResponseEntity<?> qwenToDeepseekAndGpt(@RequestBody ChatRequest req) {
@@ -91,7 +93,9 @@ public class AiController {
             ObjectMapper mapper = new ObjectMapper();
             List<Map<String, String>> result = mapper.readValue(cleaned, new TypeReference<>() {});
 
-            questionService.saveAiAnswer(cleaned);
+            String s3Key = req.getS3Key();
+
+            questionService.saveAiAnswer(cleaned, s3Key);
 
             return ResponseEntity.ok(result);
 
