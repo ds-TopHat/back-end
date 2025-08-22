@@ -12,6 +12,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -59,9 +61,8 @@ public class AiController {
                             "3. s3Key도 넣어주세요."
     )
     @PostMapping("/chat")
-    public ResponseEntity<?> qwenToDeepseekAndGpt(@RequestBody ChatRequest req) {
+    public ResponseEntity<?> qwenToDeepseekAndGpt(@AuthenticationPrincipal UserDetails userDetails, @RequestBody ChatRequest req) {
         try {
-
             List<String> presignedUrls = req.normalized();
             if (presignedUrls.isEmpty()) {
                 return ResponseEntity.badRequest().body("downloadUrl 또는 downloadUrls 중 하나는 반드시 필요합니다.");
@@ -95,7 +96,9 @@ public class AiController {
 
             String s3Key = req.getS3Key();
 
-            questionService.saveAiAnswer(cleaned, s3Key);
+            String email = userDetails.getUsername();
+
+            questionService.saveAiAnswer(email, cleaned, s3Key);
 
             return ResponseEntity.ok(result);
 
