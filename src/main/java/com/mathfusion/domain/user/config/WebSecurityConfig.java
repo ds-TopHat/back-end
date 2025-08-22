@@ -46,6 +46,7 @@ public class WebSecurityConfig {
                         .requestMatchers(
                                 "/css/**",
                                 "/images/**",
+                                "/api/v0/email-auth/**",
                                 "/js/**",
                                 "/lib/**",
                                 "/swagger-ui/**",
