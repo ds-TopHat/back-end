@@ -1,5 +1,8 @@
 package com.mathfusion.domain.user.config;
 
+import com.mathfusion.domain.user.security.JwtAccessDeniedHandler;
+import com.mathfusion.domain.user.security.JwtAuthenticationEntryPoint;
+import com.mathfusion.domain.user.security.JwtAuthenticationFilter;
 import com.mathfusion.domain.user.service.UserDetailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -9,14 +12,19 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @RequiredArgsConstructor
 @Configuration
 public class WebSecurityConfig {
 
     private final UserDetailService userService;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     // 스프링 시큐리티 기능 비활성화
     @Bean
@@ -46,8 +54,19 @@ public class WebSecurityConfig {
                 .logout(AbstractHttpConfigurer::disable)
                 .userDetailsService(userService)
 
-                //jwt 필터 등록
-                //.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(
+                        SessionCreationPolicy.STATELESS
+                ))
+
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+
+
+                .exceptionHandling(exceptionHandling -> exceptionHandling
+                        .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                        .accessDeniedHandler(jwtAccessDeniedHandler))
+
+
+        //jwt 필터 등록
                 .build();
     }
 
