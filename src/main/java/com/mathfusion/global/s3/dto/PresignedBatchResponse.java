@@ -12,4 +12,5 @@ import java.util.List;
 public class PresignedBatchResponse {
     private List<String> uploadUrls;
     private List<String> downloadUrls;
+    private String s3Key;
 }
