@@ -6,6 +6,7 @@ import com.mathfusion.domain.wrongnote.service.PdfGeneratorService;
 import com.mathfusion.domain.wrongnote.service.WrongNoteService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -15,8 +16,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.ByteArrayOutputStream;
 import java.util.List;
 
 @RestController
@@ -67,15 +67,15 @@ public class WrongNoteController {
     public ResponseEntity<Resource> generatePdf(@RequestBody PdfRequest pdfRequest) throws Exception {
         List<String> imageUrls = pdfRequest.getProblemImageUrls();
 
-        // PDF를 임시 파일로 생성
-        File pdfFile = pdfGeneratorService.generatePdfFromUrls(imageUrls);
+        // PDF를 메모리에 생성
+        ByteArrayOutputStream pdfStream = pdfGeneratorService.generatePdfFromUrls(imageUrls);
 
-        // InputStreamResource로 변환
-        InputStreamResource resource = new InputStreamResource(new FileInputStream(pdfFile));
+        // ByteArrayResource로 변환
+        ByteArrayResource resource = new ByteArrayResource(pdfStream.toByteArray());
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=exam.pdf")
-                .contentLength(pdfFile.length())
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=MAPI_exam.pdf")
+                .contentLength(resource.contentLength())
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(resource);
     }
