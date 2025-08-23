@@ -2,7 +2,7 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ "develop" ]   # develop 브랜치 push 시 실행, 나중에 main으로 변경 가능
+    branches: [ "develop" ]  # 나중에 main으로 변경 가능
 
 jobs:
   build:
@@ -48,7 +48,7 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
           source: "*.jar"
-          target: "~/"
+          target: "~/back-end/"
 
       - name: Run deploy script on EC2
         uses: appleboy/ssh-action@v1.0.0
@@ -56,5 +56,6 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
+          envs: APPLICATION_YML=${{ secrets.APPLICATION_YML }}
           script: |
-            bash ~/deploy.sh
+            bash ~/back-end/deploy.sh
