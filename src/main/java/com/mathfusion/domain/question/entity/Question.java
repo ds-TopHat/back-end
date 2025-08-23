@@ -24,9 +24,6 @@ public class Question {
     @Column(name = "problem_image")
     private String problemImage;
 
-    @Column(name = "solution_image")
-    private String solutionImage;
-
     @Lob
     @Column(name = "ai_answer", columnDefinition = "LONGTEXT")
     private String aiAnswer;
