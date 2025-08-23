@@ -2,7 +2,7 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ "develop" ]   # develop 브랜치 push 시 실행, 후에 main 브랜치 push 시, 샐행
+    branches: [ "develop" ]   # develop 브랜치 push 시 실행, 나중에 main으로 변경 가능
 
 jobs:
   build:
@@ -10,13 +10,16 @@ jobs:
 
     steps:
       - name: Checkout source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
+
+      - name: Make gradlew executable
+        run: chmod +x gradlew
 
       - name: Build with Gradle
         run: ./gradlew clean build -x test
