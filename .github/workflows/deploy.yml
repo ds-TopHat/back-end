@@ -58,4 +58,5 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           envs: APPLICATION_YML=${{ secrets.APPLICATION_YML }}
           script: |
+            echo "${{ secrets.APPLICATION_YML }}" | base64 --decode > ~/back-end/application.yml
             bash ~/back-end/deploy.sh
