@@ -57,11 +57,13 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
           script: |
-            bash -c 'printf "%b" "${APPLICATION_YML}" > /home/ubuntu/back-end/application.yml'
+            # Base64로 전달된 yml 디코딩
+            echo "${APPLICATION_YML_B64}" | base64 --decode > /home/ubuntu/back-end/application.yml
+
+            # 배포 스크립트 실행
             bash ~/back-end/deploy.sh
         env:
-          APPLICATION_YML: ${{ secrets.APPLICATION_YML }}
-
+          APPLICATION_YML_B64: ${{ secrets.APPLICATION_YML_B64 }}
 
       - name: Restart Spring Boot service
         uses: appleboy/ssh-action@v1.0.0
