@@ -52,6 +52,8 @@ jobs:
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.0
+        env:
+          APPLICATION_YML: ${{ secrets.APPLICATION_YML }}
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
@@ -62,8 +64,6 @@ jobs:
 
             # 배포 스크립트 실행
             bash ~/back-end/deploy.sh
-        env:
-          APPLICATION_YML: ${{ secrets.APPLICATION_YML }}
 
       - name: Restart Spring Boot service
         uses: appleboy/ssh-action@v1.0.0
