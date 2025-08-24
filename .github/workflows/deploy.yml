@@ -58,7 +58,7 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           script: |
             # application.yml 파일을 secrets 값으로 덮어쓰기
-            echo "${{ secrets.APPLICATION_YML }}" > ~/back-end/application.yml
+            printf "%b" "${{ secrets.APPLICATION_YML }}" > ~/back-end/application.yml
 
             # 배포 스크립트 실행
             bash ~/back-end/deploy.sh
