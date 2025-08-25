@@ -117,4 +117,8 @@ public class UserController {
             return ResponseEntity.status(401).body(e.getMessage());
         }
     }
+<<<<<<< Updated upstream
 }
+=======
+}
+>>>>>>> Stashed changes
