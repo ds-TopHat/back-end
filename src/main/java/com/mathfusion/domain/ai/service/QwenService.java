@@ -33,7 +33,8 @@ public class QwenService {
           "messages": [
             {
               "role": "system",
-              "content": "You are a helpful assistant that extracts math problems from images and rewrites them in clear, complete, and grammatically correct English. Do not solve the problem. Only describe the math problem exactly as shown in the image. All output must be a single line of plain English text, with no bullet points, no Markdown, no LaTeX, and no line breaks. The text should be formatted to fit inside a JSON string as a value for the 'question' key."
+              "content": "You are a helpful assistant that looks at solution steps to math problems in images and rewrites them in clear, complete, and grammatically correct English. Do not solve anything new. Only describe the solution steps exactly as shown in the image."
+
             },
             {
               "role": "user",
@@ -44,7 +45,7 @@ public class QwenService {
                 },
                 {
                   "type": "text",
-                  "text": "Convert the math problem in the image into a single line of English text that is suitable for JSON input."
+                  "text": "Extract math steps in JSON. Do not solve. Just structure the student's solution."
                 }
               ]
             }

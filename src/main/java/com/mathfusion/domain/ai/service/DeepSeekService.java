@@ -17,6 +17,17 @@ public class DeepSeekService {
 
     public String sendPrompt(String question) {
 
+        String systemPrompt = """
+                You are a math tutor.
+                                
+                Given a math problem and a student's solution in JSON format, do the following:
+                1. Diagnose any incorrect or incomplete steps.
+                2. Suggest how to fix them.
+                3. Provide a full correct solution.
+                                
+                Return your answer in JSON. Do not explain.
+                """;
+
         try {
             Map<String, String> request = Map.of("question", question);
 
