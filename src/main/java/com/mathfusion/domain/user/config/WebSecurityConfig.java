@@ -1,10 +1,5 @@
 package com.mathfusion.domain.user.config;
 
-import com.mathfusion.domain.user.security.JwtAccessDeniedHandler;
-import com.mathfusion.domain.user.security.JwtAuthenticationEntryPoint;
-import com.mathfusion.domain.user.security.JwtAuthenticationFilter;
-import com.mathfusion.domain.user.service.UserDetailService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -17,6 +12,13 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import com.mathfusion.domain.user.security.JwtAccessDeniedHandler;
+import com.mathfusion.domain.user.security.JwtAuthenticationEntryPoint;
+import com.mathfusion.domain.user.security.JwtAuthenticationFilter;
+import com.mathfusion.domain.user.service.UserDetailService;
+
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Configuration
@@ -78,7 +80,7 @@ public class WebSecurityConfig {
                         .accessDeniedHandler(jwtAccessDeniedHandler))
 
 
-        //jwt 필터 등록
+                //jwt 필터 등록
                 .build();
     }
 

@@ -1,83 +1,52 @@
 package com.mathfusion.domain.user.entity;
-import com.mathfusion.domain.question.entity.Question;
-import jakarta.persistence.Entity; // ← 이거여야 합니다!
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
-@Table(name = "user")
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Getter
 @Entity
-@Builder
+@Getter
+@Setter
+@NoArgsConstructor
 @AllArgsConstructor
-@EntityListeners(AuditingEntityListener.class)
+@Builder
+@Table(name = "users")
 public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", updatable = false)
     private Long id;
 
-    @Column(name = "email", nullable = false, unique = true)
+    @Column(unique = true, nullable = false)
     private String email;
 
-    @Column(name = "password", nullable = false)
+    @Column(nullable = false)
     private String password;
 
-    @CreatedDate
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Question> questions = new ArrayList<>();
-
-    @Builder
-    public User(String email, String password, String auth) {
-        this.email = email;
-        this.password = password;
-    }
-
-    @Override // 권한 반환
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_USER"));
-    }
+    // === UserDetails 구현부 ===
     @Override
-    public String getUsername(){
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return null; // 권한이 필요하다면 ROLE_USER 등 구현
+    }
+
+    @Override
+    public String getUsername() {
         return email;
     }
-    @Override
-    public String getPassword(){
-        return password;
-    }
-    @Override //계정 만료여부 반환
-    public boolean isAccountNonExpired(){
-        return true; // true --> 만료되지 않음.
-    }
-    @Override // 계정 잠금여부 반환
-    public boolean isAccountNonLocked(){
-        return true; // true --> 잠금되지않음.
-    }
-    // 패스워드 만료 여부 반환
-    @Override
-    public boolean isCredentialsNonExpired(){
-        return true; // true -> 만료되지 않음
-    }
 
-    // 계정 사용 가능 여부 변환
     @Override
-    public boolean isEnabled(){
-        return true; // true -> 사용 가능
-    }
+    public boolean isAccountNonExpired() { return true; }
+
+    @Override
+    public boolean isAccountNonLocked() { return true; }
+
+    @Override
+    public boolean isCredentialsNonExpired() { return true; }
+
+    @Override
+    public boolean isEnabled() { return true; }
 
 }

@@ -24,19 +24,20 @@ public class TokenProvider {
     private final UserDetailService userDetailsService;
     private final Key key;
     private final long expiration;
+    private final long refreshExpiration;
 
-    // 생성자 주입
     public TokenProvider(
             UserDetailService userDetailsService,
             @Value("${jwt.secret}") String secret,
-            @Value("${jwt.expiration-ms}") long expiration
+            @Value("${jwt.expiration-ms}") long expiration,
+            @Value("${jwt.refresh-expiration-ms}") long refreshExpiration
     ) {
         this.userDetailsService = userDetailsService;
         this.key = Keys.hmacShaKeyFor(Base64.getDecoder().decode(secret));
         this.expiration = expiration;
+        this.refreshExpiration = refreshExpiration;
     }
 
-    // Authorization 헤더에서 Bearer 토큰 추출
     public String extractToken(String authHeader) {
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             return authHeader.substring(7);
@@ -44,13 +45,9 @@ public class TokenProvider {
         return null;
     }
 
-    // JWT 유효성 검증
     public boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder()
-                    .setSigningKey(key)
-                    .build()
-                    .parseClaimsJws(token);
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
         } catch (ExpiredJwtException e) {
             throw new JwtException(JwtErrorCode.EXPIRED_TOKEN);
@@ -59,30 +56,37 @@ public class TokenProvider {
         }
     }
 
-    // 토큰에서 Authentication 객체 추출
     public Authentication getAuthentication(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-
-        String username = claims.getSubject();
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-
-        return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+        try {
+            Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+            String username = claims.getSubject();
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+        } catch (Exception e) {
+            throw new JwtException(JwtErrorCode.INVALID_TOKEN);
+        }
     }
 
-    // 토큰 생성
     public String createToken(String username) {
-        Date now = new Date();
-        Date validity = new Date(now.getTime() + expiration);
+        return createJwt(username, expiration);
+    }
 
-        return Jwts.builder()
-                .setSubject(username)
-                .setIssuedAt(now)
-                .setExpiration(validity)
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
+    public String createRefreshToken(String username) {
+        return createJwt(username, refreshExpiration);
+    }
+
+    private String createJwt(String username, long expiryTime) {
+        try {
+            Date now = new Date();
+            Date validity = new Date(now.getTime() + expiryTime);
+            return Jwts.builder()
+                    .setSubject(username)
+                    .setIssuedAt(now)
+                    .setExpiration(validity)
+                    .signWith(key, SignatureAlgorithm.HS256)
+                    .compact();
+        } catch (Exception e) {
+            throw new JwtException(JwtErrorCode.INVALID_TOKEN);
+        }
     }
 }

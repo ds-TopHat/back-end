@@ -1,8 +1,5 @@
 package com.mathfusion.domain.user.exception;
 
-import lombok.Getter;
-
-@Getter
 public class JwtException extends RuntimeException {
 
     private final JwtErrorCode errorCode;
@@ -10,5 +7,9 @@ public class JwtException extends RuntimeException {
     public JwtException(JwtErrorCode errorCode) {
         super(errorCode.getMessage());
         this.errorCode = errorCode;
+    }
+
+    public JwtErrorCode getErrorCode() {
+        return errorCode;
     }
 }
