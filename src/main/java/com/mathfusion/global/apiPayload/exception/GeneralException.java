@@ -1,4 +1,7 @@
 package com.mathfusion.global.apiPayload.exception;
+
+import com.mathfusion.global.apiPayload.code.status.ErrorStatus;
+
 public class GeneralException extends RuntimeException {
 
     private final ErrorStatus errorStatus;
