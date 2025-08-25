@@ -42,4 +42,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // 4. 다음 필터로 이동
         filterChain.doFilter(request, response);
     }
+<<<<<<< Updated upstream
 }
+=======
+}
+>>>>>>> Stashed changes

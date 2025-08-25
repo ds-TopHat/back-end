@@ -20,7 +20,10 @@ import com.mathfusion.domain.user.service.AuthService;
 import com.mathfusion.global.apiPayload.code.status.ErrorStatus;
 
 import lombok.RequiredArgsConstructor;
+<<<<<<< Updated upstream
 import lombok.extern.slf4j.Slf4j;
+=======
+>>>>>>> Stashed changes
 
 @Service
 @RequiredArgsConstructor
@@ -74,11 +77,15 @@ public class AuthServiceImpl implements AuthService {
             log.error("인증 서비스 오류: {}", e.getMessage(), e);
             throw new UserException(ErrorStatus.INVALID_INPUT);
         } catch (Exception e) {
+<<<<<<< Updated upstream
             log.error("인증 중 예상치 못한 오류 발생: {} (타입: {})", e.getMessage(), e.getClass().getSimpleName(), e);
+=======
+>>>>>>> Stashed changes
             throw new UserException(ErrorStatus.INVALID_INPUT);
         }
 
         // 2. 유저 조회
+<<<<<<< Updated upstream
         User user;
         try {
             user = userRepository.findByEmail(email)
@@ -91,6 +98,10 @@ public class AuthServiceImpl implements AuthService {
             log.error("유저 조회 중 데이터베이스 오류: {}", e.getMessage(), e);
             throw new UserException(ErrorStatus.USER_NOT_FOUND);
         }
+=======
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserException(ErrorStatus.USER_NOT_FOUND));
+>>>>>>> Stashed changes
 
         // 3. 토큰 생성
         String accessToken;
@@ -149,6 +160,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public String reissue(String refreshToken) {
+<<<<<<< Updated upstream
         log.info("토큰 재발급 시도");
 
         // 입력값 검증
@@ -202,5 +214,30 @@ public class AuthServiceImpl implements AuthService {
             log.error("토큰 재발급 중 예상치 못한 오류: {}", e.getMessage(), e);
             throw new JwtException(JwtErrorCode.INVALID_TOKEN);
         }
+=======
+        // 1. 토큰 유효성 검사
+        if (!jwtUtil.validateToken(refreshToken)) {
+            throw new JwtException(JwtErrorCode.INVALID_TOKEN);
+        }
+
+        // 2. 토큰에서 이메일 추출
+        String email = jwtUtil.getEmailFromToken(refreshToken);
+
+        // 3. 사용자 조회
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserException(ErrorStatus.USER_NOT_FOUND));
+
+        // 4. DB 저장된 Refresh Token 조회
+        RefreshToken savedToken = refreshTokenRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new RefreshTokenException(RefreshTokenErrorCode.NOT_FOUND));
+
+        // 5. 일치 여부 확인
+        if (!savedToken.getToken().equals(refreshToken)) {
+            throw new RefreshTokenException(RefreshTokenErrorCode.MISMATCH);
+        }
+
+        // 6. 새 Access Token 발급
+        return jwtUtil.generateToken(user.getEmail());
+>>>>>>> Stashed changes
     }
 }
