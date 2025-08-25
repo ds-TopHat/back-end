@@ -77,11 +77,7 @@ public class AiController {
             }
 
             String qwenResult;
-            try {
-                qwenResult = qwenService.callQwen25(publicUrls.toString());
-            } catch (Throwable t) {
-                qwenResult = qwenService.callQwen25(publicUrls.get(0));
-            }
+            qwenResult = qwenService.callQwen25(publicUrls);
 
             String deepseekResult = deepSeekService.sendPrompt(qwenResult);
             String gptResult = chatGPTService.prompt(deepseekResult);
