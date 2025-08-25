@@ -1,7 +1,6 @@
 package com.mathfusion.domain.user.service.impl;
 
-import com.mathfusion.domain.exception.ErrorStatus;
-import com.mathfusion.domain.exception.GeneralException;
+import com.mathfusion.global.apiPayload.code.status.ErrorStatus;
 import com.mathfusion.domain.user.dto.UserResponse;
 import com.mathfusion.domain.user.entity.RefreshToken;
 import com.mathfusion.domain.user.entity.User;
@@ -9,6 +8,7 @@ import com.mathfusion.domain.user.exception.JwtErrorCode;
 import com.mathfusion.domain.user.exception.JwtException;
 import com.mathfusion.domain.user.exception.RefreshTokenErrorCode;
 import com.mathfusion.domain.user.exception.RefreshTokenException;
+import com.mathfusion.domain.user.exception.UserException;
 import com.mathfusion.domain.user.repository.RefreshTokenRepository;
 import com.mathfusion.domain.user.repository.UserRepository;
 import com.mathfusion.domain.user.security.JwtUtil;
@@ -36,12 +36,12 @@ public class AuthServiceImpl implements AuthService {
                     new UsernamePasswordAuthenticationToken(email, password)
             );
         } catch (Exception e) {
-            throw new JwtException(JwtErrorCode.INVALID_TOKEN); // 로그인 실패시 JWT 오류 대신 INVALID_TOKEN 예시
+            throw new UserException(ErrorStatus.INVALID_INPUT);
         }
 
-        // 2. 유저 조회 (공통 에러 사용)
+        // 2. 유저 조회
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new JwtException(JwtErrorCode.ACCESS_DENIED)); // 접근 권한 없음
+                .orElseThrow(() -> new UserException(ErrorStatus.USER_NOT_FOUND));
 
         // 3. 토큰 생성
         String accessToken = jwtUtil.generateToken(user.getEmail());
@@ -68,7 +68,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public String reissue(String refreshToken) {
-        // 1. 토큰 유효성 검사 (JWT 기능별 에러)
+        // 1. 토큰 유효성 검사
         if (!jwtUtil.validateToken(refreshToken)) {
             throw new JwtException(JwtErrorCode.INVALID_TOKEN);
         }
@@ -76,12 +76,15 @@ public class AuthServiceImpl implements AuthService {
         // 2. 토큰에서 이메일 추출
         String email = jwtUtil.getEmailFromToken(refreshToken);
 
+        // 3. 사용자 조회
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+                .orElseThrow(() -> new UserException(ErrorStatus.USER_NOT_FOUND));
 
+        // 4. DB 저장된 Refresh Token 조회
         RefreshToken savedToken = refreshTokenRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new RefreshTokenException(RefreshTokenErrorCode.NOT_FOUND));
 
+        // 5. 일치 여부 확인
         if (!savedToken.getToken().equals(refreshToken)) {
             throw new RefreshTokenException(RefreshTokenErrorCode.MISMATCH);
         }
