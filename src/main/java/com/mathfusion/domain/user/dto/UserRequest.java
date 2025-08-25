@@ -20,4 +20,13 @@ public class UserRequest {
         private String email;
         private String password;
     }
+
+    // ===================== RefreshToken DTO =====================
+    @Getter
+    @Builder
+    @AllArgsConstructor(access = AccessLevel.PROTECTED)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    public static class RefreshTokenRequest {
+        private String refreshToken;
+    }
 }
