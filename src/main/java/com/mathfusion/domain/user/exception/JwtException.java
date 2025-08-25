@@ -8,4 +8,8 @@ public class JwtException extends RuntimeException {
         super(errorCode.getMessage());
         this.errorCode = errorCode;
     }
+
+    public JwtErrorCode getErrorCode() {
+        return errorCode;
+    }
 }
