@@ -34,7 +34,6 @@ public class QwenService {
             {
               "role": "system",
               "content": "You are a helpful assistant that looks at solution steps to math problems in images and rewrites them in clear, complete, and grammatically correct English. Do not solve anything new. Only describe the solution steps exactly as shown in the image."
-
             },
             {
               "role": "user",
