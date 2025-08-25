@@ -3,14 +3,11 @@ package com.mathfusion.domain.user.controller;
 import com.mathfusion.domain.user.dto.UserRequest;
 import com.mathfusion.domain.user.dto.UserResponse;
 import com.mathfusion.domain.user.security.JwtUtil;
+import com.mathfusion.domain.user.service.AuthService;
 import com.mathfusion.domain.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
-    private final AuthenticationManager authenticationManager;
+    private final AuthService authService;
 
     private final JwtUtil jwtUtil;
 
@@ -47,28 +44,10 @@ public class UserController {
     public ResponseEntity<?> login(@RequestBody @Validated UserRequest.LoginRequest request) {
 
         try {
-            // AuthenticationManager로 인증
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
-            );
-
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-
-            // JWT 토큰 생성
-            String token = jwtUtil.generateToken(request.getEmail());
-
-            // 응답 반환
-            UserResponse.LoginResponse response = UserResponse.LoginResponse.builder()
-                    .email(request.getEmail())
-                    .message("로그인 성공")
-                    .token(token)
-                    .build();
-
+            UserResponse.LoginResponse response = authService.login(request.getEmail(), request.getPassword());
             return ResponseEntity.ok(response);
-
         } catch (Exception e) {
-            e.printStackTrace(); // 어떤 예외인지 콘솔 확인
-            return ResponseEntity.status(500).body("로그인 실패: " + e.getMessage());
+            return ResponseEntity.status(401).body("로그인 실패: " + e.getMessage());
         }
     }
 
@@ -103,5 +82,17 @@ public class UserController {
         return ResponseEntity.ok("회원탈퇴 완료");
 
     }
+
+    //refresh token
+    @PostMapping("/refreshtoken")
+    public ResponseEntity<?> reissue(@RequestBody String refreshToken) {
+        try {
+            String newAccessToken = authService.reissue(refreshToken);
+            return ResponseEntity.ok(newAccessToken);
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body(e.getMessage());
+        }
+    }
+
 
 }

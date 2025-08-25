@@ -1,7 +1,9 @@
 package com.mathfusion.domain.user.security;
 
+import com.mathfusion.domain.user.exception.JwtErrorCode;
+import com.mathfusion.domain.user.exception.JwtException;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -15,30 +17,49 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    // 운영 환경에서는 Base64로 인코딩된 긴 문자열을 사용
     @Value("${jwt.secret}")
     private String secret;
 
     @Value("${jwt.expiration-ms}")
-    private long expirationMs;
+    private long accessExpirationMs;
+
+    @Value("${jwt.refresh-expiration-ms}")
+    private long refreshExpirationMs;
 
     private Key getSigningKey() {
-        // Base64 인코딩 적용
         byte[] keyBytes = Base64.getDecoder().decode(secret);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    // JWT 생성
+    // Access Token 생성
     public String generateToken(String email) {
-        return Jwts.builder()
-                .setSubject(email)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
-                .compact();
+        return createToken(email, accessExpirationMs);
     }
 
-    // JWT 검증
+    // Refresh Token 생성
+    public String generateRefreshToken(String email) {
+        return createToken(email, refreshExpirationMs);
+    }
+
+    // 공통 토큰 생성
+    private String createToken(String email, long expirationTime) {
+        try {
+            Date now = new Date();
+            Date expiryDate = new Date(now.getTime() + expirationTime);
+
+            return Jwts.builder()
+                    .setSubject(email)
+                    .setIssuedAt(now)
+                    .setExpiration(expiryDate)
+                    .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                    .compact();
+        } catch (Exception e) {
+            // JWT 생성 실패 → 일반 JwtException
+            throw new JwtException(JwtErrorCode.INVALID_TOKEN);
+        }
+    }
+
+    // 토큰 검증 (Access/Refresh 구분 없이 사용 가능)
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder()
@@ -46,18 +67,26 @@ public class JwtUtil {
                     .build()
                     .parseClaimsJws(token);
             return true;
-        } catch (JwtException | IllegalArgumentException e) {
-            return false;
+        } catch (ExpiredJwtException e) {
+            throw new JwtException(JwtErrorCode.EXPIRED_TOKEN);
+        } catch (io.jsonwebtoken.JwtException | IllegalArgumentException e) {
+            throw new JwtException(JwtErrorCode.INVALID_TOKEN);
         }
     }
 
-    // JWT에서 이메일 추출
+    // 토큰에서 이메일 추출
     public String getEmailFromToken(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-        return claims.getSubject();
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+            return claims.getSubject();
+        } catch (ExpiredJwtException e) {
+            throw new JwtException(JwtErrorCode.EXPIRED_TOKEN);
+        } catch (io.jsonwebtoken.JwtException | IllegalArgumentException e) {
+            throw new JwtException(JwtErrorCode.INVALID_TOKEN);
+        }
     }
 }

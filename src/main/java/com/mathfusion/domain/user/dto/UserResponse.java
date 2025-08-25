@@ -23,5 +23,6 @@ public class UserResponse{
         private String message;
         //탈퇴
         private String token;
+        private String refreshToken;  // Refresh Token
     }
 }
