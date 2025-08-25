@@ -55,6 +55,12 @@ public class AuthServiceImpl implements AuthService {
 
             log.info("[Login] 인증 성공: {}", email);
 
+        } catch (org.springframework.security.authentication.BadCredentialsException e) {
+            log.error("[Login] 비밀번호 불일치: {}", email);
+            throw new UserException(ErrorStatus.INVALID_INPUT);
+        } catch (org.springframework.security.core.userdetails.UsernameNotFoundException e) {
+            log.error("[Login] 사용자를 찾을 수 없음: {}", email);
+            throw new UserException(ErrorStatus.USER_NOT_FOUND);
         } catch (Exception e) {
             log.error("[Login] 인증 중 오류: {}", e.getMessage(), e);
             throw new UserException(ErrorStatus.INVALID_INPUT);
