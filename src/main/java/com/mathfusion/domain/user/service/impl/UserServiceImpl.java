@@ -1,18 +1,20 @@
 package com.mathfusion.domain.user.service.impl;
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.stereotype.Service;
-
 import com.mathfusion.domain.user.dto.UserRequest;
+import com.mathfusion.domain.user.entity.EmailVerification;
 import com.mathfusion.domain.user.entity.User;
+import com.mathfusion.domain.user.exception.EmailErrorCode;
+import com.mathfusion.domain.user.exception.EmailException;
 import com.mathfusion.domain.user.exception.UserException;
 import com.mathfusion.domain.user.repository.EmailVerificationRepository;
 import com.mathfusion.domain.user.repository.UserRepository;
 import com.mathfusion.domain.user.service.UserService;
 import com.mathfusion.global.apiPayload.code.status.ErrorStatus;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -24,17 +26,20 @@ public class UserServiceImpl implements UserService {
     private final EmailVerificationRepository emailVerificationRepository;
 
     @Override
+    @Transactional
     public Long signup(UserRequest.SignupRequest dto) {
         String email = dto.getEmail();
-        log.info("[Signup] 시도: {}", email);
 
-        if (email == null || email.trim().isEmpty() || dto.getPassword() == null || dto.getPassword().trim().isEmpty()) {
-            log.error("[Signup] 이메일 또는 비밀번호 비어있음");
-            throw new UserException(ErrorStatus.INVALID_INPUT);
+        // 최신 이메일 인증 기록 가져오기
+        EmailVerification emailVerification = emailVerificationRepository.findTopByEmailOrderByExpiredTimeDesc(email)
+                .orElseThrow(() -> new EmailException(EmailErrorCode.NOT_VERIFIED));
+
+        if (!emailVerification.isVerified()) {
+            throw new EmailException(EmailErrorCode.NOT_VERIFIED);
         }
 
+        // 이미 가입된 계정인지 확인
         if (userRepository.existsByEmail(email)) {
-            log.error("[Signup] 이미 존재하는 이메일: {}", email);
             throw new UserException(ErrorStatus.USER_ALREADY_EXISTS);
         }
 
@@ -43,10 +48,17 @@ public class UserServiceImpl implements UserService {
                 .password(bCryptPasswordEncoder.encode(dto.getPassword()))
                 .build();
 
-        User savedUser = userRepository.save(user);
-        log.info("[Signup] 회원가입 완료: {}", savedUser.getEmail());
-        return savedUser.getId();
+        try {
+            User savedUser = userRepository.save(user);
+            log.info("[Signup] 회원가입 완료: {}", savedUser.getEmail());
+            return savedUser.getId();
+        } catch (Exception e) {
+            log.error("[Signup] 회원가입 중 예기치 못한 오류: {}", e.getMessage(), e);
+            throw new UserException(ErrorStatus.INTERNAL_ERROR);
+        }
     }
+
+
 
     @Override
     public void deleteByEmail(String email) {
