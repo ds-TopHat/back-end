@@ -1,15 +1,22 @@
 package com.mathfusion.domain.user.controller;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.mathfusion.domain.user.dto.UserRequest;
 import com.mathfusion.domain.user.dto.UserResponse;
 import com.mathfusion.domain.user.security.JwtUtil;
 import com.mathfusion.domain.user.service.AuthService;
 import com.mathfusion.domain.user.service.UserService;
+
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
 
 @RestController
 @Validated
@@ -25,18 +32,23 @@ public class UserController {
     // 회원가입
     @Operation(summary = "회원가입")
     @PostMapping("/signup")
-    public ResponseEntity<UserResponse.SignupResponse> signup(
+    public ResponseEntity<?> signup(
             @RequestBody @Validated UserRequest.SignupRequest request) {
 
-        Long userId = userService.signup(request);
+        try {
+            Long userId = userService.signup(request);
 
-        UserResponse.SignupResponse response = UserResponse.SignupResponse.builder()
-                .id(userId)
-                .email(request.getEmail())
-                .build();
+            UserResponse.SignupResponse response = UserResponse.SignupResponse.builder()
+                    .id(userId)
+                    .email(request.getEmail())
+                    .build();
 
-        return ResponseEntity.ok(response);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("회원가입 실패: " + e.getMessage());
+        }
     }
+
 
     // 로그인
     @Operation(summary = "로그인")
