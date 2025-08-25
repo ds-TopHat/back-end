@@ -110,8 +110,8 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public String reissue(String refreshToken) {
-        log.info("[Reissue] 토큰 재발급 시도");
+    public UserResponse.LoginResponse reissue(String refreshToken) {
+        log.info("[Reissue] 토큰 재발급 시도: {}", refreshToken);
 
         if (refreshToken == null || refreshToken.trim().isEmpty()) {
             log.error("[Reissue] Refresh Token 비어있음");
@@ -119,30 +119,58 @@ public class AuthServiceImpl implements AuthService {
         }
 
         try {
+            // 토큰 유효성 검증
             if (!jwtUtil.validateToken(refreshToken)) {
                 log.error("[Reissue] 유효하지 않은 Refresh Token");
                 throw new JwtException(JwtErrorCode.INVALID_TOKEN);
             }
 
+            // 토큰에서 이메일 추출
             String email = jwtUtil.getEmailFromToken(refreshToken);
+            log.info("[Reissue] 토큰에서 추출한 이메일: {}", email);
+
+            // 사용자 조회
             User user = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new UserException(ErrorStatus.USER_NOT_FOUND));
+                    .orElseThrow(() -> {
+                        log.error("[Reissue] 사용자 없음: {}", email);
+                        return new UserException(ErrorStatus.USER_NOT_FOUND);
+                    });
 
+            // DB에서 Refresh Token 조회
             RefreshToken savedToken = refreshTokenRepository.findByUserId(user.getId())
-                    .orElseThrow(() -> new RefreshTokenException(RefreshTokenErrorCode.NOT_FOUND));
+                    .orElseThrow(() -> {
+                        log.error("[Reissue] DB에 Refresh Token 없음: 사용자 ID {}", user.getId());
+                        return new RefreshTokenException(RefreshTokenErrorCode.NOT_FOUND);
+                    });
 
+            // Refresh Token 일치 확인
             if (!savedToken.getToken().equals(refreshToken)) {
                 log.error("[Reissue] Refresh Token 불일치");
                 throw new RefreshTokenException(RefreshTokenErrorCode.MISMATCH);
             }
 
+            // 새 Access Token 발급
             String newAccessToken = jwtUtil.generateToken(user.getEmail());
-            log.info("[Reissue] 새 Access Token 발급 성공");
-            return newAccessToken;
+            log.info("[Reissue] 새 Access Token 발급: {}", newAccessToken);
+
+            // 새 Refresh Token 항상 갱신
+            String newRefreshToken = jwtUtil.generateRefreshToken(user.getEmail());
+            savedToken.setToken(newRefreshToken);
+            refreshTokenRepository.save(savedToken);
+            log.info("[Reissue] 새 Refresh Token 발급: {}", newRefreshToken);
+
+            // 응답 반환
+            return UserResponse.LoginResponse.builder()
+                    .email(user.getEmail())
+                    .message("토큰 재발급 성공")
+                    .token(newAccessToken)
+                    .refreshToken(newRefreshToken)
+                    .build();
 
         } catch (Exception e) {
             log.error("[Reissue] 토큰 재발급 중 오류: {}", e.getMessage(), e);
             throw new JwtException(JwtErrorCode.INVALID_TOKEN);
         }
     }
+
 }

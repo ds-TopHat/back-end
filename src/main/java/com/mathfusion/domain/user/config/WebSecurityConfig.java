@@ -54,6 +54,7 @@ public class WebSecurityConfig {
                                 "/api/v0/users/signup",
                                 "/api/v0/users/login",
                                 "/api/v0/email-auth/**",
+                                "/api/v0/users/refreshtoken",
                                 "/error",
                                 "/favicon.ico",
                                 "/default-ui.css",

@@ -1,19 +1,20 @@
 package com.mathfusion.domain.user.controller;
 
+import com.mathfusion.domain.user.dto.UserRequest;
+import com.mathfusion.domain.user.dto.UserResponse;
+import com.mathfusion.domain.user.exception.JwtException;
+import com.mathfusion.domain.user.exception.RefreshTokenException;
+import com.mathfusion.domain.user.exception.UserException;
+import com.mathfusion.domain.user.security.JwtUtil;
+import com.mathfusion.domain.user.service.AuthService;
+import com.mathfusion.domain.user.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import com.mathfusion.domain.user.dto.UserRequest;
-import com.mathfusion.domain.user.dto.UserResponse;
-import com.mathfusion.domain.user.security.JwtUtil;
-import com.mathfusion.domain.user.service.AuthService;
-import com.mathfusion.domain.user.service.UserService;
-import com.mathfusion.domain.user.exception.UserException;
-import com.mathfusion.domain.user.exception.JwtException;
-
-import io.swagger.v3.oas.annotations.Operation;
-import lombok.RequiredArgsConstructor;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v0/users")
@@ -93,15 +94,39 @@ public class UserController {
 
     // ===================== 리프레시 토큰 =====================
     @Operation(summary = "리프레시 토큰")
+
     @PostMapping("/refreshtoken")
     public ResponseEntity<?> reissue(@RequestBody UserRequest.RefreshTokenRequest request) {
         try {
-            String newAccessToken = authService.reissue(request.getRefreshToken());
-            return ResponseEntity.ok(newAccessToken);
+            UserResponse.LoginResponse newTokenResponse = authService.reissue(request.getRefreshToken());
+            return ResponseEntity.ok(newTokenResponse);
+
         } catch (JwtException e) {
-            return ResponseEntity.status(401).body("리프레시 토큰 실패: " + e.getMessage());
+            // JSON 형태 통일
+            Map<String, String> body = Map.of(
+                    "code", "JWT001",
+                    "message", "리프레시 토큰 실패: " + e.getMessage()
+            );
+            return ResponseEntity.status(401).body(body);
+
+        } catch (RefreshTokenException e) {
+            Map<String, String> body = Map.of(
+                    "code", "REFRESH001",
+                    "message", "Refresh Token 문제: " + e.getMessage()
+            );
+            return ResponseEntity.status(401).body(body);
+
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("리프레시 토큰 중 오류 발생: " + e.getMessage());
+            Map<String, String> body = Map.of(
+                    "code", "SERVER001",
+                    "message", "서버 오류: " + e.getMessage()
+            );
+            return ResponseEntity.status(500).body(body);
         }
     }
+
+
 }
+
+
+

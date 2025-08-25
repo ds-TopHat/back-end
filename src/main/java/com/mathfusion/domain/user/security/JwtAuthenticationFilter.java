@@ -24,6 +24,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final Set<String> PERMIT_PATHS = Set.of(
             "/api/v0/users/signup",
             "/api/v0/users/login",
+            "/api/v0/email-auth/request-code",
+            "/api/v0/email-auth/verify-code",
+            "/api/v0/users/refreshtoken",
             "/favicon.ico",
             "/error",
             "/health"
@@ -33,18 +36,29 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        // 1. 요청 헤더에서 토큰 추출
-        String token = tokenProvider.extractToken(request.getHeader(HttpHeaders.AUTHORIZATION));
+        try {
+            String token = tokenProvider.extractToken(request.getHeader(HttpHeaders.AUTHORIZATION));
 
-        // 2. 토큰 검증 후 Authentication 등록
-        if (token != null && tokenProvider.validateToken(token)) {
+            if (token == null || !tokenProvider.validateToken(token)) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json;charset=UTF-8");
+                response.getWriter().write("{\"code\":\"JWT001\",\"message\":\"유효하지 않은 토큰입니다.\"}");
+                return;
+            }
+
             Authentication authentication = tokenProvider.getAuthentication(token);
             SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            filterChain.doFilter(request, response);
+
+        } catch (Exception e) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json;charset=UTF-8");
+            response.getWriter().write("{\"code\":\"JWT001\",\"message\":\"유효하지 않은 토큰입니다.\"}");
         }
 
-        // 3. 다음 필터로 이동
-        filterChain.doFilter(request, response);
     }
+
 
     /**
      * permitAll 경로는 JWT 검증 필터를 아예 적용하지 않음
