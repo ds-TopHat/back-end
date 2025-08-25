@@ -84,6 +84,7 @@ public class UserController {
     }
 
     //refresh token
+    @Operation(summary = "리프레시 토큰")
     @PostMapping("/refreshtoken")
     public ResponseEntity<?> reissue(@RequestBody String refreshToken) {
         try {
