@@ -49,7 +49,6 @@ public class UserController {
         }
     }
 
-
     // 로그인
     @Operation(summary = "로그인")
     @PostMapping("/login")
@@ -59,40 +58,52 @@ public class UserController {
             UserResponse.LoginResponse response = authService.login(request.getEmail(), request.getPassword());
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return ResponseEntity.status(401).body("로그인 실패: " + e.getMessage());
+            return ResponseEntity.status(500).body("로그인 실패: " + e.getMessage());
         }
     }
-
 
     //회원 탈퇴
     @Operation(summary = "회원탈퇴")
     @DeleteMapping("/delete")
     public ResponseEntity<?> deleteUser(@RequestHeader("Authorization") String authHeader){
 
-        //토큰에서 실제 jwt 추출
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.badRequest().body("jwt 토큰이 없습니다.");
-        }
-        String token = authHeader.substring(7);
-
-        // JWT 검증 (try-catch 추가)
         try {
-            if (!jwtUtil.validateToken(token)) {
-                return ResponseEntity.status(401).body("유효하지 않은 토큰입니다.");
+            //토큰에서 실제 jwt 추출
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                return ResponseEntity.badRequest().body("jwt 토큰이 없습니다.");
             }
+            String token = authHeader.substring(7);
+
+            // JWT 검증
+            try {
+                if (!jwtUtil.validateToken(token)) {
+                    return ResponseEntity.status(401).body("유효하지 않은 토큰입니다.");
+                }
+            } catch (Exception e) {
+                return ResponseEntity.status(500).body("JWT 검증 오류: " + e.getMessage());
+            }
+
+            // 토큰에서 이메일 추출
+            String email;
+            try {
+                email = jwtUtil.getEmailFromToken(token);
+            } catch (Exception e) {
+                return ResponseEntity.status(500).body("토큰에서 이메일 추출 오류: " + e.getMessage());
+            }
+
+            // DB에서 회원 삭제
+            try {
+                userService.deleteByEmail(email);
+            } catch (Exception e) {
+                return ResponseEntity.status(500).body("회원 삭제 오류: " + e.getMessage());
+            }
+
+            // 탈퇴 완료 메시지 반환
+            return ResponseEntity.ok("회원탈퇴 완료");
+
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("서버 내부 오류: " + e.getMessage());
+            return ResponseEntity.status(500).body("회원탈퇴 중 예상치 못한 오류: " + e.getMessage());
         }
-
-        // 토큰에서 이메일 추출
-        String email = jwtUtil.getEmailFromToken(token);
-
-        // DB에서 회원 삭제
-        userService.deleteByEmail(email);
-
-        // 탈퇴 완료 메시지 반환
-        return ResponseEntity.ok("회원탈퇴 완료");
-
     }
 
     //refresh token
@@ -106,6 +117,4 @@ public class UserController {
             return ResponseEntity.status(401).body(e.getMessage());
         }
     }
-
-
 }
