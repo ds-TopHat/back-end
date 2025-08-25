@@ -43,6 +43,7 @@ public class AuthServiceImpl implements AuthService {
 
         // 인증
         try {
+            log.info("[Login] AuthenticationManager를 통한 인증 시도: {}", email);
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(email, password)
             );

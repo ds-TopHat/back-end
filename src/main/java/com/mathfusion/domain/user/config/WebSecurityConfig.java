@@ -51,7 +51,8 @@ public class WebSecurityConfig {
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui.html",
-                                "/api/v0/users/**",
+                                "/api/v0/users/signup",
+                                "/api/v0/users/login",
                                 "/api/v0/email-auth/**",
                                 "/error",
                                 "/favicon.ico",
@@ -71,13 +72,10 @@ public class WebSecurityConfig {
 
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 
-
                 .exceptionHandling(exceptionHandling -> exceptionHandling
                         .authenticationEntryPoint(jwtAuthenticationEntryPoint)
                         .accessDeniedHandler(jwtAccessDeniedHandler))
 
-
-                //jwt 필터 등록
                 .build();
     }
 
