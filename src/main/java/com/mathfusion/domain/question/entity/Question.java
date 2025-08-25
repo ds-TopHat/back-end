@@ -33,7 +33,7 @@ public class Question {
     private LocalDateTime createdAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "id")
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
