@@ -87,10 +87,21 @@ public class UserServiceImpl implements UserService {
     //회원탈퇴
     @Override
     public void deleteByEmail(String email){
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(()-> new UserException(ErrorStatus.USER_NOT_FOUND));
+        log.info("회원탈퇴 시도: {}", email);
+        
+        try {
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(()-> new UserException(ErrorStatus.USER_NOT_FOUND));
 
-        userRepository.delete(user);
+            userRepository.delete(user);
+            log.info("회원탈퇴 완료: {}", email);
+        } catch (UserException e) {
+            log.error("회원탈퇴 중 사용자 관련 오류: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("회원탈퇴 중 예상치 못한 오류: {}", e.getMessage(), e);
+            throw new UserException(ErrorStatus.USER_NOT_FOUND);
+        }
     }
 
 }
