@@ -1,6 +1,5 @@
 package com.mathfusion.domain.user.exception;
 
-
 public class EmailException extends RuntimeException {
 
     private final EmailErrorCode errorCode;

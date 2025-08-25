@@ -1,8 +1,5 @@
 package com.mathfusion.domain.user.exception;
 
-import lombok.Getter;
-
-@Getter
 public class JwtException extends RuntimeException {
 
     private final JwtErrorCode errorCode;
