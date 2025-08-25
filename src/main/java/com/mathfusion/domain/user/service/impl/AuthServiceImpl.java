@@ -35,6 +35,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public UserResponse.LoginResponse login(String email, String password) {
         log.info("로그인 시도: {}", email);
+        log.info("입력된 비밀번호 길이: {}", password != null ? password.length() : "null");
 
         // 입력값 검증
         if (email == null || email.trim().isEmpty()) {
@@ -48,9 +49,12 @@ public class AuthServiceImpl implements AuthService {
 
         // 1. 인증
         try {
+            log.info("AuthenticationManager.authenticate() 호출 시작");
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(email, password)
             );
+            log.info("AuthenticationManager.authenticate() 호출 완료");
+
             // 인증 성공 시 authentication 객체를 사용하거나 검증
             if (authentication == null || !authentication.isAuthenticated()) {
                 log.error("인증 실패: authentication이 null이거나 인증되지 않음");
@@ -66,8 +70,11 @@ public class AuthServiceImpl implements AuthService {
         } catch (org.springframework.security.authentication.LockedException e) {
             log.error("잠긴 계정: {}", email);
             throw new UserException(ErrorStatus.INVALID_INPUT);
+        } catch (org.springframework.security.authentication.AuthenticationServiceException e) {
+            log.error("인증 서비스 오류: {}", e.getMessage(), e);
+            throw new UserException(ErrorStatus.INVALID_INPUT);
         } catch (Exception e) {
-            log.error("인증 중 예상치 못한 오류 발생: {}", e.getMessage(), e);
+            log.error("인증 중 예상치 못한 오류 발생: {} (타입: {})", e.getMessage(), e.getClass().getSimpleName(), e);
             throw new UserException(ErrorStatus.INVALID_INPUT);
         }
 

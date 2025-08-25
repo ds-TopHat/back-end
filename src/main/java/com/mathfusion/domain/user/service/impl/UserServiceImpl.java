@@ -74,7 +74,7 @@ public class UserServiceImpl implements UserService {
             User savedUser = userRepository.save(user);
             log.info("회원가입 완료: {}", savedUser.getEmail());
             return savedUser.getId();
-
+            
         } catch (UserException e) {
             log.error("회원가입 중 사용자 관련 오류: {}", e.getMessage());
             throw e;
@@ -103,5 +103,4 @@ public class UserServiceImpl implements UserService {
             throw new UserException(ErrorStatus.USER_NOT_FOUND);
         }
     }
-
 }
