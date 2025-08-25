@@ -1,5 +1,10 @@
 package com.mathfusion.domain.user.config;
 
+import com.mathfusion.domain.user.security.JwtAccessDeniedHandler;
+import com.mathfusion.domain.user.security.JwtAuthenticationEntryPoint;
+import com.mathfusion.domain.user.security.JwtAuthenticationFilter;
+import com.mathfusion.domain.user.service.UserDetailService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -12,13 +17,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
-import com.mathfusion.domain.user.security.JwtAccessDeniedHandler;
-import com.mathfusion.domain.user.security.JwtAuthenticationEntryPoint;
-import com.mathfusion.domain.user.security.JwtAuthenticationFilter;
-import com.mathfusion.domain.user.service.UserDetailService;
-
-import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Configuration
@@ -54,7 +52,8 @@ public class WebSecurityConfig {
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui.html",
-                                "/api/v0/users/**",
+                                "/api/v0/users/signup",
+                                "/api/v0/users/login",
                                 "/api/v0/email-auth/**",
                                 "/error",
                                 "/favicon.ico",
@@ -74,13 +73,10 @@ public class WebSecurityConfig {
 
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 
-
                 .exceptionHandling(exceptionHandling -> exceptionHandling
                         .authenticationEntryPoint(jwtAuthenticationEntryPoint)
                         .accessDeniedHandler(jwtAccessDeniedHandler))
 
-
-                //jwt 필터 등록
                 .build();
     }
 

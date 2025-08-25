@@ -4,8 +4,10 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Getter
@@ -29,7 +31,7 @@ public class User implements UserDetails {
     // === UserDetails 구현부 ===
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null; // 권한이 필요하다면 ROLE_USER 등 구현
+        return List.of(new SimpleGrantedAuthority("ROLE_USER")); // 기본 사용자 권한
     }
 
     @Override
@@ -48,5 +50,4 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() { return true; }
-
 }
