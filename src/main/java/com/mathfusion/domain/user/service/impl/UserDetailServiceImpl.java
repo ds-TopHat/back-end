@@ -1,14 +1,13 @@
 package com.mathfusion.domain.user.service.impl;
 
 
-import com.mathfusion.domain.exception.ErrorStatus;
+import com.mathfusion.global.apiPayload.code.status.ErrorStatus;
 import com.mathfusion.domain.user.entity.User;
 import com.mathfusion.domain.user.exception.UserException;
 import com.mathfusion.domain.user.repository.UserRepository;
 import com.mathfusion.domain.user.service.UserDetailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 //인증 구현체

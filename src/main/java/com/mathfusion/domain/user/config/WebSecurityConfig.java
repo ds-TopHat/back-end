@@ -7,6 +7,7 @@ import com.mathfusion.domain.user.service.UserDetailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -41,13 +42,23 @@ public class WebSecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable) // CSRF 비활성화
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(
-                                "/api/v0/users/signup",
-                                "/api/v0/users/login",
-                                "/api/v0/users/delete",
+                                "/css/**",
+                                "/images/**",
+                                "/js/**",
+                                "/lib/**",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/swagger-ui.html",
+                                "/api/v0/users/**",
                                 "/api/v0/email-auth/**",
-                                "/static/**").permitAll()
-                        .anyRequest().authenticated()  // 2025.08.14 데모 기준에서 수정
+                                "/error",
+                                "/favicon.ico",
+                                "/default-ui.css",
+                                "/health"
+                        ).permitAll()
+                        .anyRequest().authenticated()
                 )
                 .httpBasic(AbstractHttpConfigurer::disable) // form 기반 -> REST API용 로그인
                 .formLogin(AbstractHttpConfigurer::disable) // formLogin 비활성화

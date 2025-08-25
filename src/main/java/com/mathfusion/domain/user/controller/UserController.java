@@ -5,6 +5,7 @@ import com.mathfusion.domain.user.dto.UserResponse;
 import com.mathfusion.domain.user.security.JwtUtil;
 import com.mathfusion.domain.user.service.AuthService;
 import com.mathfusion.domain.user.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -21,8 +22,8 @@ public class UserController {
 
     private final JwtUtil jwtUtil;
 
-
     // 회원가입
+    @Operation(summary = "회원가입")
     @PostMapping("/signup")
     public ResponseEntity<UserResponse.SignupResponse> signup(
             @RequestBody @Validated UserRequest.SignupRequest request) {
@@ -38,6 +39,7 @@ public class UserController {
     }
 
     // 로그인
+    @Operation(summary = "로그인")
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody @Validated UserRequest.LoginRequest request) {
 
@@ -51,6 +53,7 @@ public class UserController {
 
 
     //회원 탈퇴
+    @Operation(summary = "회원탈퇴")
     @DeleteMapping("/delete")
     public ResponseEntity<?> deleteUser(@RequestHeader("Authorization") String authHeader){
 

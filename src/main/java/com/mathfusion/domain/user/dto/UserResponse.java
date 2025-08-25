@@ -3,7 +3,7 @@ package com.mathfusion.domain.user.dto;
 import lombok.*;
 
 public class UserResponse{
-    //회원가입
+    //회원가입 로직
     @Getter
     @Builder
     @AllArgsConstructor(access = AccessLevel.PROTECTED)
@@ -13,7 +13,7 @@ public class UserResponse{
         private String email;
     }
 
-    //로그인
+    //로그인 로직
     @Getter
     @Builder
     @AllArgsConstructor(access = AccessLevel.PROTECTED)

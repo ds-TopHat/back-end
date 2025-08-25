@@ -1,10 +1,14 @@
 package com.mathfusion.global.s3;
 
+import com.mathfusion.global.s3.dto.PresignedBatchResponse;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -13,10 +17,27 @@ public class S3Controller {
 
     private final S3Service s3Service;
 
+    // 문제 1장 반환 : /s3/presigned
+    // 문제 1장 + 사용자 문제풀이 1장 : /s3/presigned?count=2
+    @Operation(summary = "이미지 업로드 할 s3 url 받아오기", description = "문제 1장 : /s3/presigned,     " + "문제 1장 + 사용자 문제풀이 1장 : /s3/presigned?count=2")
     @GetMapping("/s3/presigned")
-    public Map<String, String> getBothPresignedUrls() {
-        String uuidFileName = UUID.randomUUID() + ".png";
-        return s3Service.generateUploadAndDownloadUrls("uploads/" + uuidFileName);
-    }
+    public PresignedBatchResponse getPresignedUrls(
+            @RequestParam(name = "count", defaultValue = "1") int count
+    ) {
+        count = Math.max(1, Math.min(count, 2));
 
+        List<String> ups = new ArrayList<>();
+        List<String> downs = new ArrayList<>();
+        String s3Key = null;
+
+        for (int i = 0; i < count; i++) {
+            String objectKey = "uploads/" + UUID.randomUUID() + ".png";
+            var pair = s3Service.generateUploadAndDownloadUrls(objectKey);
+            ups.add(pair.getUploadUrl());
+            downs.add(pair.getDownloadUrl());
+            if (i == 0) s3Key = objectKey;
+        }
+
+        return new PresignedBatchResponse(ups, downs, s3Key);
+    }
 }

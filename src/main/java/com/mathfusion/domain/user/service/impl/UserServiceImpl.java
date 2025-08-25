@@ -1,6 +1,6 @@
 package com.mathfusion.domain.user.service.impl;
 
-import com.mathfusion.domain.exception.ErrorStatus;
+import com.mathfusion.global.apiPayload.code.status.ErrorStatus;
 import com.mathfusion.domain.user.dto.UserRequest;
 import com.mathfusion.domain.user.entity.EmailVerification;
 import com.mathfusion.domain.user.entity.User;

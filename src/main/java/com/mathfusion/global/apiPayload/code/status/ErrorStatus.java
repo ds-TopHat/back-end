@@ -1,4 +1,4 @@
-package com.mathfusion.domain.exception;
+package com.mathfusion.global.apiPayload.code.status;
 
 public enum ErrorStatus {
     USER_NOT_FOUND("U001","해당 유저를 찾을 수 없습니다."),
