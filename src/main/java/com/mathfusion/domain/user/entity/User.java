@@ -40,9 +40,6 @@ public class User implements UserDetails {
     @Override
     public boolean isAccountNonExpired() { return true; }
 
-<<<<<<< Updated upstream
-}
-=======
     @Override
     public boolean isAccountNonLocked() { return true; }
 
@@ -52,4 +49,3 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() { return true; }
 }
->>>>>>> Stashed changes
