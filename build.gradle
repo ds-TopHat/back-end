@@ -78,6 +78,9 @@ dependencies {
 
     // 오답노트 pdf 생성
     implementation 'org.apache.pdfbox:pdfbox:2.0.29'
+
+    // spring security OAuth2 클라이언트 의존성
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 }
 
 tasks.named('test') {
