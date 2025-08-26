@@ -9,6 +9,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -19,6 +20,7 @@ import java.util.Set;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final TokenProvider tokenProvider;
+    private static final AntPathMatcher pathMatcher = new AntPathMatcher();
 
     // permitAll 경로 정의
     private static final Set<String> PERMIT_PATHS = Set.of(
@@ -29,7 +31,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/api/v0/users/refreshtoken",
             "/favicon.ico",
             "/error",
-            "/health"
+            "/health",
+            "/css/**",
+            "/images/**",
+            "/js/**",
+            "/lib/**",
+            "/swagger-ui/**",
+            "/v3/api-docs/**",
+            "/swagger-ui.html",
+            "/api/v0/email-auth/**",
+            "/default-ui.css"
     );
 
     @Override
@@ -75,7 +86,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // permitAll 경로 확인
         for (String permitPath : PERMIT_PATHS) {
-            if (path.equals(permitPath) || path.startsWith(permitPath + "/")) {
+            if (pathMatcher.match(permitPath, path)) {
                 return true;
             }
         }

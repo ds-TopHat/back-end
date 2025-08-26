@@ -27,14 +27,6 @@ public class WebSecurityConfig {
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
-    // 스프링 시큐리티 기능 비활성화
-    @Bean
-    public WebSecurityCustomizer configure(){
-        return (web) -> web.ignoring()
-//                .requestMatchers(toH2Console())
-                .requestMatchers("/static/**");
-    }
-
     // 특정 HTTP 요청에 대한 웹 기반 보안 구성
     //~is deprecated since version 6.1 and marked for removal 오류: 스프링 시큐리티 6.1 버전 이상에서는 authorizeRequests()와 같은 일부 메서드가 더 이상 권장되지않음.
     @Bean
@@ -52,6 +44,8 @@ public class WebSecurityConfig {
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui.html",
+                                "/webjars/**",
+                                "/swagger-resources/**",
                                 "/api/v0/users/signup",
                                 "/api/v0/users/login",
                                 "/api/v0/email-auth/**",
