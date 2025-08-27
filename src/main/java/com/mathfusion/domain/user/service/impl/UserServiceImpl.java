@@ -3,6 +3,8 @@ package com.mathfusion.domain.user.service.impl;
 import com.mathfusion.domain.user.dto.UserRequest;
 import com.mathfusion.domain.user.entity.EmailVerification;
 import com.mathfusion.domain.user.entity.User;
+import com.mathfusion.domain.user.entity.enums.LoginType;
+import com.mathfusion.domain.user.entity.enums.UserStatus;
 import com.mathfusion.domain.user.exception.EmailErrorCode;
 import com.mathfusion.domain.user.exception.EmailException;
 import com.mathfusion.domain.user.exception.UserException;
@@ -46,6 +48,8 @@ public class UserServiceImpl implements UserService {
         User user = User.builder()
                 .email(email)
                 .password(bCryptPasswordEncoder.encode(dto.getPassword()))
+                .loginType(LoginType.NORMAL)
+                .status(UserStatus.ACTIVE)
                 .build();
 
         try {
