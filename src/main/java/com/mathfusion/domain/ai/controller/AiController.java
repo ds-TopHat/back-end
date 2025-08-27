@@ -10,6 +10,7 @@ import com.mathfusion.domain.ai.service.UploadRelayService;
 import com.mathfusion.domain.question.service.QuestionService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -23,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v0/ai")
 @RequiredArgsConstructor
@@ -79,26 +81,17 @@ public class AiController {
             String qwenResult;
             qwenResult = qwenService.callQwen25(publicUrls);
 
-            String deepseekResult = deepSeekService.sendPrompt(qwenResult);
-            String gptResult = chatGPTService.prompt(deepseekResult);
-
-            String cleaned = gptResult;
-            if (cleaned.contains("```")) {
-                cleaned = cleaned.replaceAll("```json|```", "").trim();
-            }
-
-            ObjectMapper mapper = new ObjectMapper();
-            List<Map<String, String>> result = mapper.readValue(cleaned, new TypeReference<>() {});
+            List<Map<String, String>> result = chatGPTService.prompt(qwenResult);
 
             String s3Key = req.getS3Key();
-
             String email = userDetails.getUsername();
 
-            questionService.saveAiAnswer(email, cleaned, s3Key);
+            questionService.saveAiAnswer(email, result, s3Key);
 
             return ResponseEntity.ok(result);
 
         } catch (Exception e) {
+            log.error("Ai 처리 실패", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Ai 처리 실패 : " + e.getMessage());
         }
