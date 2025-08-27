@@ -1,5 +1,6 @@
 package com.mathfusion.domain.user.entity;
 
+import com.mathfusion.domain.user.entity.enums.LoginType;
 import com.mathfusion.domain.user.entity.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -39,6 +40,10 @@ public class User implements UserDetails {
 
     @Column(nullable = true, unique = true)
     private String socialId; // 카카오 id (String으로 저장)
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private LoginType loginType;
 
     // === UserDetails 구현부 ===
     @Override
