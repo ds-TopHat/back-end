@@ -17,7 +17,13 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "users")
+@Table(
+        name = "users",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_users_social_login",
+                        columnNames = {"socialId", "loginType"})
+        }
+)
 public class User implements UserDetails {
 
     @Id
@@ -38,7 +44,7 @@ public class User implements UserDetails {
     @Column(nullable = true)
     private String name;   // 카카오 닉네임 or 직접 입력 이름
 
-    @Column(nullable = true, unique = true)
+    @Column(nullable = true)
     private String socialId; // 카카오 id (String으로 저장)
 
     @Enumerated(EnumType.STRING)
@@ -53,7 +59,7 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return email;
+        return email!= null ? email : socialId;
     }
 
     @Override
