@@ -40,7 +40,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/v3/api-docs/**",
             "/swagger-ui.html",
             "/api/v0/email-auth/**",
-            "/default-ui.css"
+            "/default-ui.css",
+            "/api/auth/kakao/**"
     );
 
     @Override

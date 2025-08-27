@@ -28,6 +28,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class KakaoAuthService {
 
+    // https://dream-and-develop.tistory.com/249
     private final UserRepository userRepository;
     private final SocialUserRepository socialUserRepository;
     private final TokenProvider tokenProvider;
@@ -130,4 +131,5 @@ public class KakaoAuthService {
                 String.valueOf(body.get("id"))
         );
     }
+
 }
