@@ -44,6 +44,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/api/auth/kakao/**"
     );
 
+    //
+    private void setCorsHeaders(HttpServletResponse response) {
+        response.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
+        response.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+        response.setHeader("Access-Control-Allow-Credentials", "true");
+    }
+
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
@@ -53,6 +61,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             if (token == null || !tokenProvider.validateToken(token)) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                setCorsHeaders(response); // CORS 헤더 추가
                 response.setContentType("application/json;charset=UTF-8");
                 response.getWriter().write("{\"code\":\"JWT001\",\"message\":\"유효하지 않은 토큰입니다.\"}");
                 return;
@@ -65,11 +74,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            setCorsHeaders(response); // CORS 헤더 추가
             response.setContentType("application/json;charset=UTF-8");
             response.getWriter().write("{\"code\":\"JWT001\",\"message\":\"유효하지 않은 토큰입니다.\"}");
         }
-
     }
+
 
 
     /**
