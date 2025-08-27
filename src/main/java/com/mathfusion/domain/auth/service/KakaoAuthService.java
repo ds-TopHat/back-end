@@ -1,0 +1,126 @@
+package com.mathfusion.domain.auth.service;
+
+import com.mathfusion.domain.auth.dto.KakaoRequestDTO;
+import com.mathfusion.domain.auth.dto.KakaoResponseDTO;
+import com.mathfusion.domain.auth.dto.KakaoUserInfo;
+import com.mathfusion.domain.user.converter.UserConverter;
+import com.mathfusion.domain.user.entity.User;
+import com.mathfusion.domain.user.entity.enums.LoginType;
+import com.mathfusion.domain.user.entity.enums.UserStatus;
+import com.mathfusion.domain.user.repository.UserRepository;
+import com.mathfusion.domain.user.security.TokenProvider;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
+
+@Service
+@RequiredArgsConstructor
+public class KakaoAuthService {
+
+    private final UserRepository userRepository;
+    private final TokenProvider tokenProvider;
+
+    // 카카오 로그인 요청 처리
+    public KakaoResponseDTO.KakaoLoginResponseDTO processKakaoLogin(KakaoRequestDTO.KakaoLoginRequestDTO request){
+        String kakaoAccessToken = request.getAccessToken();
+        KakaoUserInfo userInfo = getUserInfo(kakaoAccessToken);
+
+        Optional<User> userOpt = userRepository.findBySocialIdAndLoginType(userInfo.getId(), LoginType.KAKAO);
+
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+
+            if (user.getStatus() == UserStatus.INACTIVE) {
+                throw new RuntimeException("탈퇴한 회원입니다.");
+            }
+
+            Authentication authentication = new UsernamePasswordAuthenticationToken(
+                    user.getId(), null, Collections.emptyList()
+            );
+
+            String jwtAccessToken = tokenProvider.createToken(authentication.getName());
+            String jwtRefreshToken = tokenProvider.createRefreshToken(authentication.getName());
+
+            return KakaoResponseDTO.KakaoLoginResponseDTO.builder()
+                    .access_token(jwtAccessToken)
+                    .refresh_token(jwtRefreshToken)
+                    .email(user.getEmail())
+                    .name(user.getName())
+                    .socialId(user.getSocialId())
+                    .isNew(false)
+                    .build();
+        } else {
+            // 신규 가입 필요
+            return KakaoResponseDTO.KakaoLoginResponseDTO.builder()
+                    .email(userInfo.getEmail())          // null일 수도 있음(프론트에서 별도 입력받도록 UX 고려)
+                    .name(userInfo.getNickname())
+                    .socialId(userInfo.getId())
+                    .isNew(true)
+                    .build();
+        }
+    }
+
+    // 카카오 회원가입
+    public KakaoResponseDTO.KakaoLoginResponseDTO signupKakaoMember(KakaoRequestDTO.KakaoSignupRequestDTO request){
+
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("이미 일반 회원가입을 완료한 사용자입니다.");
+        }
+
+        User user = UserConverter.toUser(request);
+        User savedUser = userRepository.save(user);
+
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+                savedUser.getId(), // ← savedUser 사용
+                null,
+                Collections.emptyList()
+        );
+
+        String token = tokenProvider.createToken(authentication.getName());
+        String refreshToken = tokenProvider.createRefreshToken(authentication.getName());
+
+        return KakaoResponseDTO.KakaoLoginResponseDTO.builder()
+                .access_token(token)
+                .refresh_token(refreshToken)
+                .isNew(false)
+                .build();
+    }
+
+    // 카카오에서 발급받은 access 토큰을 이용해서 사용자 정보 요청하는 메서드
+    private KakaoUserInfo getUserInfo(String accessToken) {
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(accessToken);
+
+        HttpEntity<String> request = new HttpEntity<>(headers);
+        ResponseEntity<Map> response = restTemplate.exchange(
+                "https://kapi.kakao.com/v2/user/me",
+                HttpMethod.GET,
+                request,
+                Map.class
+        );
+
+        Map<String, Object> body = response.getBody();
+        if (body == null) throw new RuntimeException("카카오 응답이 비어있습니다.");
+
+        Map<String, Object> kakaoAccount = (Map<String, Object>) body.getOrDefault("kakao_account", Collections.emptyMap());
+        Map<String, Object> profile = (Map<String, Object>) kakaoAccount.getOrDefault("profile", Collections.emptyMap());
+
+        String email = (String) kakaoAccount.get("email"); // null 가능
+        String nickname = (String) profile.getOrDefault("nickname", "");
+        String id = String.valueOf(body.get("id"));
+
+        return new KakaoUserInfo(email, nickname, id);
+    }
+}
+
