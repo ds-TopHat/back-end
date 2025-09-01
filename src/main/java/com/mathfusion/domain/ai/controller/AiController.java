@@ -84,6 +84,16 @@ public class AiController {
 //            log.info("GPT Parsed Result(size={}): {}", parsed.size(), parsed);
 
             // svg
+            List<Map<String, String>> svgApplied = new ArrayList<>();
+            for (Map<String, String> item : parsed) {
+                Map<String, String> converted = new LinkedHashMap<>();
+                for (Map.Entry<String, String> e : item.entrySet()) {
+                    String k = e.getKey();
+                    String v = e.getValue();
+                    converted.put(k, v != null ? switchSvgService.replaceLatexWithSvg(v) : null);
+                }
+                svgApplied.add(converted);
+            }
             // ------
 
             String s3Key = req.getS3Key();
