@@ -81,7 +81,8 @@ public class WebSecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of(
                 "http://localhost:5173",
-                "https://topmapi.duckdns.org"
+                "https://topmapi.duckdns.org",
+                "https://ds-tophat.vercel.app/"
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
