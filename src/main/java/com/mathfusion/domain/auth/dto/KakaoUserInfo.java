@@ -7,6 +7,5 @@ import lombok.Getter;
 @AllArgsConstructor
 public class KakaoUserInfo {
     private String email;
-    private String nickname;
     private String id;
 }
