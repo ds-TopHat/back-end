@@ -82,7 +82,7 @@ public class WebSecurityConfig {
         configuration.setAllowedOrigins(List.of(
                 "http://localhost:5173",
                 "https://topmapi.duckdns.org",
-                "https://ds-tophat.vercel.app/"
+                "https://ds-tophat.vercel.app"
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
