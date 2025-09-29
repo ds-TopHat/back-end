@@ -7,8 +7,10 @@ import com.mathfusion.domain.user.converter.UserConverter;
 import com.mathfusion.domain.user.entity.User;
 import com.mathfusion.domain.user.entity.enums.LoginType;
 import com.mathfusion.domain.user.entity.enums.UserStatus;
+import com.mathfusion.domain.user.exception.UserException;
 import com.mathfusion.domain.user.repository.UserRepository;
 import com.mathfusion.domain.user.security.TokenProvider;
+import com.mathfusion.global.apiPayload.code.status.ErrorStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -55,16 +57,15 @@ public class KakaoAuthService {
                     .access_token(jwtAccessToken)
                     .refresh_token(jwtRefreshToken)
                     .email(user.getEmail())
-                    .name(user.getName())
                     .socialId(user.getSocialId())
                     .isNew(false)
                     .build();
         } else {
             // 신규 가입 필요
             return KakaoResponseDTO.KakaoLoginResponseDTO.builder()
-                    .email(userInfo.getEmail())          // null일 수도 있음(프론트에서 별도 입력받도록 UX 고려)
-                    .name(userInfo.getNickname())
+                    .email(userInfo.getEmail())
                     .socialId(userInfo.getId())
+                    .loginType(LoginType.KAKAO)
                     .isNew(true)
                     .build();
         }
@@ -74,7 +75,7 @@ public class KakaoAuthService {
     public KakaoResponseDTO.KakaoLoginResponseDTO signupKakaoMember(KakaoRequestDTO.KakaoSignupRequestDTO request){
 
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("이미 일반 회원가입을 완료한 사용자입니다.");
+            throw new UserException(ErrorStatus.ALREADY_REGISTERED_USER);
         }
 
         User user = UserConverter.toUser(request);
@@ -117,10 +118,9 @@ public class KakaoAuthService {
         Map<String, Object> profile = (Map<String, Object>) kakaoAccount.getOrDefault("profile", Collections.emptyMap());
 
         String email = (String) kakaoAccount.get("email"); // null 가능
-        String nickname = (String) profile.getOrDefault("nickname", "");
         String id = String.valueOf(body.get("id"));
 
-        return new KakaoUserInfo(email, nickname, id);
+        return new KakaoUserInfo(email, id);
     }
 }
 
