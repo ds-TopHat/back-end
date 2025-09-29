@@ -16,8 +16,8 @@ public class KakaoResponseDTO {
         private String access_token;
         private String refresh_token;
         private String email;
-        private String socialId;   // 카카오 id
-        private Boolean isNew; // if true, need new signup logic
+        private String socialId;
+        private Boolean isNew;
         private LoginType loginType;
     }
 }

@@ -82,7 +82,7 @@ public class KakaoAuthService {
         User savedUser = userRepository.save(user);
 
         Authentication authentication = new UsernamePasswordAuthenticationToken(
-                savedUser.getId(), // ← savedUser 사용
+                savedUser.getId(),
                 null,
                 Collections.emptyList()
         );
@@ -93,6 +93,9 @@ public class KakaoAuthService {
         return KakaoResponseDTO.KakaoLoginResponseDTO.builder()
                 .access_token(token)
                 .refresh_token(refreshToken)
+                .email(user.getEmail())
+                .socialId(user.getSocialId())
+                .loginType(savedUser.getLoginType())
                 .isNew(false)
                 .build();
     }
