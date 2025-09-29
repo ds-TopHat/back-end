@@ -55,7 +55,6 @@ public class KakaoAuthService {
                     .access_token(jwtAccessToken)
                     .refresh_token(jwtRefreshToken)
                     .email(user.getEmail())
-                    .name(user.getName())
                     .socialId(user.getSocialId())
                     .isNew(false)
                     .build();
@@ -63,8 +62,8 @@ public class KakaoAuthService {
             // 신규 가입 필요
             return KakaoResponseDTO.KakaoLoginResponseDTO.builder()
                     .email(userInfo.getEmail())          // null일 수도 있음(프론트에서 별도 입력받도록 UX 고려)
-                    .name(userInfo.getNickname())
                     .socialId(userInfo.getId())
+                    .loginType(LoginType.KAKAO)
                     .isNew(true)
                     .build();
         }
@@ -117,10 +116,9 @@ public class KakaoAuthService {
         Map<String, Object> profile = (Map<String, Object>) kakaoAccount.getOrDefault("profile", Collections.emptyMap());
 
         String email = (String) kakaoAccount.get("email"); // null 가능
-        String nickname = (String) profile.getOrDefault("nickname", "");
         String id = String.valueOf(body.get("id"));
 
-        return new KakaoUserInfo(email, nickname, id);
+        return new KakaoUserInfo(email, id);
     }
 }
 
