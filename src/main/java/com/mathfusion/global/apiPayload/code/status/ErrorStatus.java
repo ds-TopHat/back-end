@@ -5,7 +5,8 @@ public enum ErrorStatus {
 
     USER_ALREADY_EXISTS("U002", "이미 존재하는 유저입니다."),
     INVALID_INPUT("C001", "입력 값이 유효하지 않습니다."),
-    INTERNAL_ERROR("S001", "서버 내부 오류가 발생했습니다.");
+    INTERNAL_ERROR("S001", "서버 내부 오류가 발생했습니다."),
+    ALREADY_REGISTERED_USER("USER409", "이미 일반 회원가입을 완료한 사용자입니다.");
 
 
 
