@@ -23,7 +23,9 @@ import java.util.List;
         name = "users",
         uniqueConstraints = {
                 @UniqueConstraint(name = "uk_users_social_login",
-                        columnNames = {"socialId", "loginType"})
+                        columnNames = {"social_Id", "login_Type"}),
+                @UniqueConstraint(name = "uk_users_email_loginType",
+                        columnNames = {"email", "login_Type"})
         }
 )
 public class User implements UserDetails {
