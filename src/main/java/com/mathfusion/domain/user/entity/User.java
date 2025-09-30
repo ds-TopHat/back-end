@@ -23,9 +23,9 @@ import java.util.List;
         name = "users",
         uniqueConstraints = {
                 @UniqueConstraint(name = "uk_users_social_login",
-                        columnNames = {"social_Id", "login_Type"}),
+                        columnNames = {"social_id", "login_type"}),
                 @UniqueConstraint(name = "uk_users_email_loginType",
-                        columnNames = {"email", "login_Type"})
+                        columnNames = {"email", "login_type"})
         }
 )
 public class User implements UserDetails {
@@ -45,11 +45,11 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private UserStatus status = UserStatus.ACTIVE;
 
-    @Column(nullable = true)
-    private String socialId; // 카카오 id (String으로 저장)
+    @Column(name = "social_id", nullable = true)
+    private String socialId;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "login_type", nullable = false)
     private LoginType loginType;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
