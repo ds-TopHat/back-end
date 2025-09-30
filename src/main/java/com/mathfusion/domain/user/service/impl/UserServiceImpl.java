@@ -73,7 +73,6 @@ public class UserServiceImpl implements UserService {
                 : userRepository.findByEmail(identifier)
                 .orElseThrow(() -> new UserException(ErrorStatus.USER_NOT_FOUND));
 
-        user.setStatus(UserStatus.INACTIVE);
-        userRepository.save(user);
+        userRepository.delete(user);
     }
 }
