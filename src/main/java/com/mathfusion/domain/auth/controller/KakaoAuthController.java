@@ -60,7 +60,7 @@ public class KakaoAuthController {
     @Operation(
             summary = "카카오 로그인 요청 API",
             description = "회원가입 완료한 카카오 회원의 로그인을 위한 API," +
-                    "signup 이후 받은 access_token은 jwt이므로 이곳에 넣으시면 됩니다."
+                    "소셜아이디를 이곳에 넣으세요"
     )
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공"),
