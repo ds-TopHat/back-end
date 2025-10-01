@@ -66,7 +66,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void deleteByEmail(String identifier) {
+    public void deleteByIdentifier(String identifier) {
         User user = identifier.matches("\\d+")
                 ? userRepository.findById(Long.parseLong(identifier))
                 .orElseThrow(() -> new UserException(ErrorStatus.USER_NOT_FOUND))

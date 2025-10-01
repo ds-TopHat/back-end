@@ -9,6 +9,5 @@ public interface UserService {
    Long signup(UserRequest.SignupRequest dto);
 
    //회원 탈퇴
-   void deleteByEmail(String email);
-
+   void deleteByIdentifier(String identifier);
 }
