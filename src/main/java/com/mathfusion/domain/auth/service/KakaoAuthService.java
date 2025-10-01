@@ -6,7 +6,6 @@ import com.mathfusion.domain.auth.dto.KakaoUserInfo;
 import com.mathfusion.domain.user.converter.UserConverter;
 import com.mathfusion.domain.user.entity.User;
 import com.mathfusion.domain.user.entity.enums.LoginType;
-import com.mathfusion.domain.user.entity.enums.UserStatus;
 import com.mathfusion.domain.user.exception.UserException;
 import com.mathfusion.domain.user.repository.UserRepository;
 import com.mathfusion.domain.user.security.TokenProvider;
@@ -32,8 +31,8 @@ public class KakaoAuthService {
     private final UserRepository userRepository;
     private final TokenProvider tokenProvider;
 
-    // 카카오 로그인 요청 처리
-    public KakaoResponseDTO.KakaoLoginResponseDTO processKakaoLogin(KakaoRequestDTO.KakaoLoginRequestDTO request){
+    // 카카오 인가코드 처리(isnew 여부)
+    public KakaoResponseDTO.KakaoLoginResponseDTO processKakaoLogin(KakaoRequestDTO.KakaoAuthCodeRequestDTO request){
         String kakaoAccessToken = request.getAccessToken();
         KakaoUserInfo userInfo = getUserInfo(kakaoAccessToken);
 
@@ -41,10 +40,6 @@ public class KakaoAuthService {
 
         if (userOpt.isPresent()) {
             User user = userOpt.get();
-
-            if (user.getStatus() == UserStatus.INACTIVE) {
-                throw new RuntimeException("탈퇴한 회원입니다.");
-            }
 
             Authentication authentication = new UsernamePasswordAuthenticationToken(
                     user.getId(), null, Collections.emptyList()
@@ -124,6 +119,33 @@ public class KakaoAuthService {
         String id = String.valueOf(body.get("id"));
 
         return new KakaoUserInfo(email, id);
+    }
+
+    // 카카오 서비스 로그인
+    public KakaoResponseDTO.KakaoLoginResponseDTO loginKakaoMember(KakaoRequestDTO.KakaoLoginRequestDTO request) {
+        Optional<User> userOpt = userRepository.findBySocialIdAndLoginType(request.getSocialId(), LoginType.KAKAO);
+
+        if (userOpt.isEmpty()) {
+            throw new RuntimeException("가입되지 않은 회원입니다.");
+        }
+
+        User user = userOpt.get();
+
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+                user.getId(), null, Collections.emptyList()
+        );
+
+        String jwtAccessToken = tokenProvider.createToken(authentication.getName());
+        String jwtRefreshToken = tokenProvider.createRefreshToken(authentication.getName());
+
+        return KakaoResponseDTO.KakaoLoginResponseDTO.builder()
+                .access_token(jwtAccessToken)
+                .refresh_token(jwtRefreshToken)
+                .email(user.getEmail())
+                .socialId(user.getSocialId())
+                .isNew(false)
+                .loginType(LoginType.KAKAO)
+                .build();
     }
 }
 
