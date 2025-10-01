@@ -45,12 +45,11 @@ public class KakaoAuthService {
                     user.getId(), null, Collections.emptyList()
             );
 
-            String jwtAccessToken = tokenProvider.createToken(authentication.getName());
-            String jwtRefreshToken = tokenProvider.createRefreshToken(authentication.getName());
+            Map<String, String> tokens = generateTokens(user);
 
             return KakaoResponseDTO.KakaoLoginResponseDTO.builder()
-                    .access_token(jwtAccessToken)
-                    .refresh_token(jwtRefreshToken)
+                    .access_token(tokens.get("access_token"))
+                    .refresh_token(tokens.get("refresh_token"))
                     .email(user.getEmail())
                     .socialId(user.getSocialId())
                     .isNew(false)
@@ -82,12 +81,11 @@ public class KakaoAuthService {
                 Collections.emptyList()
         );
 
-        String token = tokenProvider.createToken(authentication.getName());
-        String refreshToken = tokenProvider.createRefreshToken(authentication.getName());
+        Map<String, String> tokens = generateTokens(user);
 
         return KakaoResponseDTO.KakaoLoginResponseDTO.builder()
-                .access_token(token)
-                .refresh_token(refreshToken)
+                .access_token(tokens.get("access_token"))
+                .refresh_token(tokens.get("refresh_token"))
                 .email(user.getEmail())
                 .socialId(user.getSocialId())
                 .loginType(savedUser.getLoginType())
@@ -135,17 +133,26 @@ public class KakaoAuthService {
                 user.getId(), null, Collections.emptyList()
         );
 
-        String jwtAccessToken = tokenProvider.createToken(authentication.getName());
-        String jwtRefreshToken = tokenProvider.createRefreshToken(authentication.getName());
+        Map<String, String> tokens = generateTokens(user);
 
         return KakaoResponseDTO.KakaoLoginResponseDTO.builder()
-                .access_token(jwtAccessToken)
-                .refresh_token(jwtRefreshToken)
+                .access_token(tokens.get("access_token"))
+                .refresh_token(tokens.get("refresh_token"))
                 .email(user.getEmail())
                 .socialId(user.getSocialId())
                 .isNew(false)
                 .loginType(LoginType.KAKAO)
                 .build();
+    }
+
+    private Map<String, String> generateTokens(User user) {
+        String jwtAccessToken = tokenProvider.createToken(String.valueOf(user.getId()));
+        String jwtRefreshToken = tokenProvider.createRefreshToken(String.valueOf(user.getId()));
+
+        return Map.of(
+                "access_token", jwtAccessToken,
+                "refresh_token", jwtRefreshToken
+        );
     }
 }
 
