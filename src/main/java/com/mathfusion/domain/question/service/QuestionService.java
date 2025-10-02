@@ -31,7 +31,11 @@ public class QuestionService {
 
         // 마지막 항목에서 type 추출
         Map<String, String> lastItem = gptResult.get(gptResult.size() - 2);
-        String type = lastItem.get("type");
+        String type = gptResult.stream()
+                .filter(m -> m.containsKey("type"))
+                .map(m -> m.get("type"))
+                .findFirst()
+                .orElse(null);
 
         if (type == null) {
             throw new IllegalArgumentException("AI JSON에서 type 정보를 찾을 수 없습니다.");
