@@ -21,50 +21,64 @@ public class DeepSeekService {
 
     public String sendText(String question1, @Nullable String question2) {
 
-        // 프롬프트 분기
-        String systemPrompt;
-        if (question2 == null) {
-            systemPrompt = """
-                You are a math tutor.
-                Input is a JSON with a problem and student's steps.
-                Return a single minified JSON:
-                {"diagnosis":[{"step_index":n,"issue":str}], "fixes":[{"step_index":n,"suggestion":str}], "solution":{"steps":[{"index":n,"expression":str,"reason":str}], "final_answer":str}}.
-                Do not add text outside JSON.
-            """;
-        } else {
-            systemPrompt = """
-                You are a math tutor.
-             Input: JSON with a problem and student's steps.\s
-             Note: The input text uses the delimiter "\\n---\\n". The part before "\\n---\\n" is the problem, and the part after "\\n---\\n" is the student's steps.
-             Tasks:\s
-               (1) diagnose incorrect steps,
-               (2) suggest fixes,
-               (3) provide full correct solution,
-               (4) mark the next step after the student's last correct step.
-             Return ONE minified JSON EXACTLY in this shape:
-             {"diagnosis":[{"step_index":n,"issue":str}],
-              "fixes":[{"step_index":n,"suggestion":str}],
-              "solution":{"steps":[{"index":n,"expression":str,"reason":str}],"final_answer":str},
-              "next_step_index":n}
-             No text outside JSON.
-            """;
-        }
+        String rulesEn = """
+            Rules: Output ONLY a JSON array. No code fences, no extra text, no HTML, no tags.
+            Allowed keys: "step n", "answer", "type", "next_step" only.
+            At least 3 step objects. All text in English.
+            The value for "type" must be EXACTLY ONE from this list:
+            [Properties of Natural Numbers, Integers and Rational Numbers, Rational Numbers and Decimals, Letters and Expressions,
+            Linear Equations, Inequalities, Coordinate Plane and Graphs, Basic Figures, Transformations of Figures, Data Collection and Organization,
+            Mean and Median, Possibility, Rational Numbers and Repeating Decimals, Algebraic Operations, Linear Functions, Simultaneous Linear Equations,
+            Properties of Figures, Constructions and Congruence, Triangles and Quadrilaterals, Data Representation and Interpretation, Probability,
+            Real Numbers and Square Roots, Factorization, Quadratic Equations, Quadratic Functions, Pythagorean Theorem, Equation of a Circle,
+            Understanding and Applications of Statistics]
+            next_step policy: The user provides RAW student steps as an array of {index, expression}.
+            Let c be the last index that is correct and meaningfully aligned with your generated steps; set next_step to "step {c+1}".
+            If none align, use c=0 → next_step = "step 1". Do NOT base next_step on your step count.
+        """;
+
+        // ===== Few-shot 예시 =====
+        String fewShot = """
+            User: {"question": "Compute 2+3."}
+            ---
+            {"steps": [{"index":1,"expression":"Add 2 and 3"}]}
+            Assistant: <think>(Simple arithmetic; produce at least 3 steps and the required fields)</think>
+            <answer>
+            [{"step 1": "Identify the addends: 2 and 3."}, {"step 2": "Compute 2 + 3 = 5."}, {"step 3": "Confirm the result."},
+            {"answer": "5"}, {"type": "Integers and Rational Numbers"}, {"next_step": "step 2"}]
+            </answer>
+        """;
+
+        String header = """
+            A conversation between User and Assistant. The user asks a question, and the Assistant solves it.
+            The Assistant must return ONLY the final JSON array inside <answer> </answer>.
+            
+        """;
 
         try {
-            // question1과 question2를 string으로 합치기
+
             String combinedQuestion = question1;
             if (question2 != null) {
-                combinedQuestion += "\n---\n" + question2; // 구분자 넣기
+                combinedQuestion += "\n---\n" + question2;
             }
 
-            // combinedQuestion 로그
+            //최종
+            String systemPrompt = header
+                    + fewShot + "\n"
+                    + "User: " + combinedQuestion + "\n"
+                    + "Assistant: <think>\n"
+                    + rulesEn + "\n"
+                    + "</think>\n"
+                    + "<answer>\n"
+                    + "You MUST begin with '[' and end with ']'.\n";
+
+
             log.info("Combined Question:\n{}", combinedQuestion);
 
             Map<String, String> request = new HashMap<>();
             request.put("question", combinedQuestion);
             request.put("systemPrompt", systemPrompt);
 
-            // 요청 직전 전체 request 로그
             log.info("DeepSeek Request Body:\n{}", request);
 
             Mono<String> responseMono = webClient.post()
@@ -73,9 +87,7 @@ public class DeepSeekService {
                     .retrieve()
                     .bodyToMono(String.class);
 
-            String finalResult = responseMono.block();
-
-            return finalResult;
+            return responseMono.block();
 
         } catch (Exception e) {
             System.err.println("DeepSeek 호출 실패: " + e.toString());

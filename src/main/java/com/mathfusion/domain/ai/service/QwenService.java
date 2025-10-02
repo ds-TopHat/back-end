@@ -38,19 +38,9 @@ public class QwenService {
         if (imageUrls.size() == 2) {
             String qwenResult1 = callQwenProblemOnly(imageUrls.get(0));
             String qwenResult2 = callQwenProblemAndSolution(imageUrls.get(0), imageUrls.get(1));
-            // String finalResult = deepSeekService.sendText(qwenResult1, qwenResult2);
 
             try {
-                // question1과 question2를 string으로 합치기
-                String combinedQuestion = qwenResult1;
-                if (qwenResult2 != null) {
-                    combinedQuestion += "\n---\n" + qwenResult2; // 구분자 넣기
-                }
-
-                // combinedQuestion 로그
-                log.info("Qwen Combined Question:\n{}", combinedQuestion);
-
-                return combinedQuestion;
+                return deepSeekService.sendText(qwenResult1, qwenResult2);
             } catch (Exception e) {
                 System.err.println("이미지url 2개일 때 Qwen 호출 실패: " + e.toString());
                 throw e;
