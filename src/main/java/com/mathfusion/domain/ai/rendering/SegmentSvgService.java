@@ -1,10 +1,8 @@
 package com.mathfusion.domain.ai.rendering;
 
 import com.aspose.tex.MathRendererOptions;
-import com.aspose.tex.Size2D;
 import com.aspose.tex.SvgMathRenderer;
 import com.aspose.tex.SvgMathRendererOptions;
-import com.mathfusion.domain.ai.service.SwitchSvgService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

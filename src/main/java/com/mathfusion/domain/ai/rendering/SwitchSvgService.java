@@ -1,4 +1,4 @@
-package com.mathfusion.domain.ai.service;
+package com.mathfusion.domain.ai.rendering;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
