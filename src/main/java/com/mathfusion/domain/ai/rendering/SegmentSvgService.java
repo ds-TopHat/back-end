@@ -1,8 +1,9 @@
 package com.mathfusion.domain.ai.rendering;
 
+import com.aspose.tex.MathRendererOptions;
 import com.aspose.tex.Size2D;
 import com.aspose.tex.SvgMathRenderer;
-import com.aspose.tex.rendering.SvgMathRendererOptions;
+import com.aspose.tex.SvgMathRendererOptions;
 import com.mathfusion.domain.ai.service.SwitchSvgService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -37,10 +38,9 @@ public class SegmentSvgService {
     }
 
     // Aspose 호출
-    private String renderWithAspose(String input){
-        try(ByteArrayOutputStream out = new ByteArrayOutputStream()){
-            // Aspose api 삽입
-            SvgMathRendererOptions options = new SvgMathRendererOptions();
+    private String renderWithAspose(String input) {
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            MathRendererOptions options = new SvgMathRendererOptions();
             options.setPreamble("\\usepackage{amsmath}\n"
                     + "\\usepackage{amsfonts}\n"
                     + "\\usepackage{amssymb}");
@@ -48,13 +48,13 @@ public class SegmentSvgService {
             options.setBackgroundColor(Color.WHITE);
             options.setTextColor(Color.BLACK);
 
-            Size2D size = new Size2D.Float();
             String latex = "\\begin{equation*}\n" + input + "\n\\end{equation*}";
 
-            new SvgMathRenderer().render(latex, out, options, size);
+            new SvgMathRenderer().render(latex, out, options);
 
             return out.toString(StandardCharsets.UTF_8);
-        }catch(Exception e){
+        } catch (Exception e) {
+            e.printStackTrace();
             return input;
         }
     }
