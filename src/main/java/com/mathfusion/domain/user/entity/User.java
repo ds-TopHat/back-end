@@ -1,5 +1,6 @@
 package com.mathfusion.domain.user.entity;
 
+import com.mathfusion.domain.question.entity.Question;
 import com.mathfusion.domain.user.entity.enums.LoginType;
 import com.mathfusion.domain.user.entity.enums.UserStatus;
 import jakarta.persistence.*;
@@ -8,6 +9,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -21,7 +23,9 @@ import java.util.List;
         name = "users",
         uniqueConstraints = {
                 @UniqueConstraint(name = "uk_users_social_login",
-                        columnNames = {"socialId", "loginType"})
+                        columnNames = {"social_id", "login_type"}),
+                @UniqueConstraint(name = "uk_users_email_loginType",
+                        columnNames = {"email", "login_type"})
         }
 )
 public class User implements UserDetails {
@@ -41,15 +45,15 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private UserStatus status = UserStatus.ACTIVE;
 
-    @Column(nullable = true)
-    private String name;   // 카카오 닉네임 or 직접 입력 이름
-
-    @Column(nullable = true)
-    private String socialId; // 카카오 id (String으로 저장)
+    @Column(name = "social_id", nullable = true)
+    private String socialId;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "login_type", nullable = false)
     private LoginType loginType;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Question> questions = new ArrayList<>();
 
     // === UserDetails 구현부 ===
     @Override

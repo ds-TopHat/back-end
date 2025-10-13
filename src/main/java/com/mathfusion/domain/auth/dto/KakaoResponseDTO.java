@@ -1,5 +1,6 @@
 package com.mathfusion.domain.auth.dto;
 
+import com.mathfusion.domain.user.entity.enums.LoginType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,8 +16,8 @@ public class KakaoResponseDTO {
         private String access_token;
         private String refresh_token;
         private String email;
-        private String name;
-        private String socialId;   // 카카오 id
-        private Boolean isNew; // if true, need new signup logic
+        private String socialId;
+        private Boolean isNew;
+        private LoginType loginType;
     }
 }

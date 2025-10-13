@@ -1,15 +1,14 @@
 package com.mathfusion.domain.ai.controller;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mathfusion.domain.ai.dto.ChatRequest;
+import com.mathfusion.domain.ai.rendering.SegmentSvgService;
 import com.mathfusion.domain.ai.service.ChatGPTService;
-import com.mathfusion.domain.ai.service.DeepSeekService;
 import com.mathfusion.domain.ai.service.QwenService;
 import com.mathfusion.domain.ai.service.UploadRelayService;
 import com.mathfusion.domain.question.service.QuestionService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,9 +19,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
+@Slf4j
 @RestController
 @RequestMapping("/api/v0/ai")
 @RequiredArgsConstructor
@@ -30,9 +30,9 @@ public class AiController {
 
     private final QwenService qwenService;
     private final UploadRelayService uploadRelayService;
-    private final DeepSeekService deepSeekService;
     private final ChatGPTService chatGPTService;
     private final QuestionService questionService;
+    private final SegmentSvgService segmentSvgService;
 
     @Operation(
             summary = "AI에 수학문제 풀이 요청",
@@ -56,12 +56,13 @@ public class AiController {
                             "}\n" +
                             "```\n\n" +
                             "2. 한 번 요청을 넣으면 네트워크 탭에 `200`과 `pending` 상태가 표시됩니다. " +
-                            "AI 모델 응답이 오기까지 약 1~3분 정도 소요될 수 있으므로, 응답을 받기 전에 추가 요청을 보내면 처리 지연이 발생할 수 있습니다." +
-                            "\n\n" +
+                            "AI 모델 응답이 오기까지 약 1~3분 정도 소요될 수 있으므로, 응답을 받기 전에 추가 요청을 보내면 처리 지연이 발생할 수 있습니다.\n\n" +
                             "3. s3Key도 넣어주세요."
     )
     @PostMapping("/chat")
-    public ResponseEntity<?> qwenToDeepseekAndGpt(@AuthenticationPrincipal UserDetails userDetails, @RequestBody ChatRequest req) {
+    public ResponseEntity<?> qwenToDeepseekAndGpt(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody ChatRequest req) {
         try {
             List<String> presignedUrls = req.normalized();
             if (presignedUrls.isEmpty()) {
@@ -71,38 +72,40 @@ public class AiController {
             List<String> publicUrls = new ArrayList<>();
             for (String url : presignedUrls) {
                 String publicUrl = uploadRelayService.uploadToCloudinary(url);
-                System.out.println("Presigned URL: " + url);
-                System.out.println("Qwen에 전달될 공개 URL: " + publicUrl);
+                log.info("Presigned URL: {}", url);
+                log.info("Qwen에 전달될 공개 URL: {}", publicUrl);
                 publicUrls.add(publicUrl);
             }
 
-            String qwenResult;
-            qwenResult = qwenService.callQwen25(publicUrls);
+            String qwenResult = qwenService.callQwen25(publicUrls);
+//            log.info("Qwen Response:\n{}", qwenResult);
 
-            String deepseekResult = deepSeekService.sendPrompt(qwenResult);
-            String gptResult = chatGPTService.prompt(deepseekResult);
+            List<Map<String, String>> parsed = chatGPTService.prompt(qwenResult);
+//            log.info("GPT Parsed Result(size={}): {}", parsed.size(), parsed);
 
-            String cleaned = gptResult;
-            if (cleaned.contains("```")) {
-                cleaned = cleaned.replaceAll("```json|```", "").trim();
+            // svg
+            List<Map<String, String>> svgApplied = new ArrayList<>();
+            for (Map<String, String> item : parsed) {
+                Map<String, String> converted = new LinkedHashMap<>();
+                for (Map.Entry<String, String> e : item.entrySet()) {
+                    String k = e.getKey();
+                    String v = e.getValue();
+                    converted.put(k, v != null ? segmentSvgService.finalRender(v) : null);
+                }
+                svgApplied.add(converted);
             }
-
-            ObjectMapper mapper = new ObjectMapper();
-            List<Map<String, String>> result = mapper.readValue(cleaned, new TypeReference<>() {});
+            // ------
 
             String s3Key = req.getS3Key();
+            String email = (userDetails != null) ? userDetails.getUsername() : "anonymous";
+            questionService.saveAiAnswer(email, svgApplied, s3Key);
 
-            String email = userDetails.getUsername();
-
-            questionService.saveAiAnswer(email, cleaned, s3Key);
-
-            return ResponseEntity.ok(result);
+            return ResponseEntity.ok(svgApplied);
 
         } catch (Exception e) {
+            log.error("Ai 처리 실패", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Ai 처리 실패 : " + e.getMessage());
         }
     }
-
-
 }

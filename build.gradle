@@ -21,6 +21,7 @@ configurations {
 
 repositories {
     mavenCentral()
+    maven { url "https://releases.aspose.com/java/repo/" }
 }
 
 dependencies {
@@ -78,6 +79,12 @@ dependencies {
 
     // 오답노트 pdf 생성
     implementation 'org.apache.pdfbox:pdfbox:2.0.29'
+
+    // LateX to SVG
+    implementation 'org.scilab.forge:jlatexmath:1.0.7'
+    implementation 'org.apache.xmlgraphics:batik-all:1.17'
+    implementation 'com.aspose:aspose-words:20.5:jdk17'
+    implementation 'com.aspose:aspose-tex:25.8'
 
     // spring security OAuth2 클라이언트 의존성
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
