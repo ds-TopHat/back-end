@@ -64,7 +64,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 setCorsHeaders(response); //cors에러 처리
                 response.setContentType("application/json;charset=UTF-8");
-                response.getWriter().write("{\"code\":\"JWT002\",\"message\":\"JWT 토큰이 없습니다.\"}");
+                response.getWriter().write("{\"code\":\"401\",\"message\":\"JWT 토큰이 없습니다.\"}");
                 return;
             }
 
@@ -73,7 +73,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 setCorsHeaders(response); //cors에러 처리
                 response.setContentType("application/json;charset=UTF-8");
-                response.getWriter().write("{\"code\":\"JWT001\",\"message\":\"유효하지 않은 토큰입니다.\"}");
+                response.getWriter().write("{\"code\":\"401\",\"message\":\"유효하지 않은 토큰입니다.\"}");
                 return;
             }
 
@@ -85,7 +85,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             setCorsHeaders(response);
             response.setContentType("application/json;charset=UTF-8");
-            response.getWriter().write("{\"code\":\"JWT001\",\"message\":\"유효하지 않은 토큰입니다.\"}");
+            response.getWriter().write("{\"code\":\"401\",\"message\":\"유효하지 않은 토큰입니다.\"}");
         }
     }
 

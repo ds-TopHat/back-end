@@ -104,14 +104,14 @@ public class UserController {
         } catch (JwtException e) {
             // JSON 형태 통일
             Map<String, String> body = Map.of(
-                    "code", "JWT001",
+                    "code", "401",
                     "message", "리프레시 토큰 실패: " + e.getMessage()
             );
             return ResponseEntity.status(401).body(body);
 
         } catch (RefreshTokenException e) {
             Map<String, String> body = Map.of(
-                    "code", "REFRESH001",
+                    "code", "401",
                     "message", "Refresh Token 문제: " + e.getMessage()
             );
             return ResponseEntity.status(401).body(body);
