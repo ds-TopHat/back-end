@@ -55,13 +55,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-
         try {
-            String token = tokenProvider.extractToken(request.getHeader(HttpHeaders.AUTHORIZATION));
+            String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+            String token = tokenProvider.extractToken(authHeader);
 
-            if (token == null || !tokenProvider.validateToken(token)) {
+            // 토큰이 아예 없는 경우
+            if (token == null) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                setCorsHeaders(response); // CORS 헤더 추가
+                setCorsHeaders(response); //cors에러 처리
+                response.setContentType("application/json;charset=UTF-8");
+                response.getWriter().write("{\"code\":\"JWT002\",\"message\":\"JWT 토큰이 없습니다.\"}");
+                return;
+            }
+
+            // 토큰이 유효하지 않은 경우
+            if (!tokenProvider.validateToken(token)) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                setCorsHeaders(response); //cors에러 처리
                 response.setContentType("application/json;charset=UTF-8");
                 response.getWriter().write("{\"code\":\"JWT001\",\"message\":\"유효하지 않은 토큰입니다.\"}");
                 return;
@@ -69,16 +79,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             Authentication authentication = tokenProvider.getAuthentication(token);
             SecurityContextHolder.getContext().setAuthentication(authentication);
-
             filterChain.doFilter(request, response);
 
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            setCorsHeaders(response); // CORS 헤더 추가
+            setCorsHeaders(response);
             response.setContentType("application/json;charset=UTF-8");
             response.getWriter().write("{\"code\":\"JWT001\",\"message\":\"유효하지 않은 토큰입니다.\"}");
         }
     }
+
 
 
 
