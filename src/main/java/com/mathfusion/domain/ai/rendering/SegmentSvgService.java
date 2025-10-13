@@ -29,10 +29,18 @@ public class SegmentSvgService {
 
     // 변환 안되고 있는 라텍스 후보
     private boolean containsLatex(String text){
-        return text.contains("\\frac")||
-                text.contains("\\sqrt")||
-                text.contains("\\sum")||
-                text.contains("\\int");
+        return text.contains("\\frac") ||
+                text.contains("\\sqrt") ||
+                text.contains("\\sum") ||
+                text.contains("\\int") ||
+                text.contains("\\times") ||
+                text.contains("\\cdot") ||
+                text.contains("\\log") ||
+                text.contains("\\sin") ||
+                text.contains("\\cos") ||
+                text.contains("\\tan") ||
+                text.contains("^") ||  // 지수
+                text.contains("_");   // 아래첨자
     }
 
     // Aspose 호출
@@ -46,7 +54,8 @@ public class SegmentSvgService {
             options.setBackgroundColor(Color.WHITE);
             options.setTextColor(Color.BLACK);
 
-            String latex = "\\begin{equation*}\n" + input + "\n\\end{equation*}";
+            String latex = "$$" + input + "$$";
+            // String latex = "\\(" + input + "\\)";
 
             new SvgMathRenderer().render(latex, out, options);
 
