@@ -83,8 +83,6 @@ dependencies {
     // LateX to SVG
     implementation 'org.scilab.forge:jlatexmath:1.0.7'
     implementation 'org.apache.xmlgraphics:batik-all:1.17'
-    implementation 'com.aspose:aspose-words:20.5:jdk17'
-    implementation 'com.aspose:aspose-tex:25.8'
 
 
     // spring security OAuth2 클라이언트 의존성

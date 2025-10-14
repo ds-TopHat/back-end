@@ -1,7 +1,7 @@
 package com.mathfusion.domain.ai.controller;
 
 import com.mathfusion.domain.ai.dto.ChatRequest;
-import com.mathfusion.domain.ai.rendering.SegmentSvgService;
+import com.mathfusion.domain.ai.rendering.SwitchSvgService;
 import com.mathfusion.domain.ai.service.ChatGPTService;
 import com.mathfusion.domain.ai.service.QwenService;
 import com.mathfusion.domain.ai.service.UploadRelayService;
@@ -32,7 +32,7 @@ public class AiController {
     private final UploadRelayService uploadRelayService;
     private final ChatGPTService chatGPTService;
     private final QuestionService questionService;
-    private final SegmentSvgService segmentSvgService;
+    private final SwitchSvgService switchSvgService;
 
     @Operation(
             summary = "AI에 수학문제 풀이 요청",
@@ -90,7 +90,7 @@ public class AiController {
                 for (Map.Entry<String, String> e : item.entrySet()) {
                     String k = e.getKey();
                     String v = e.getValue();
-                    converted.put(k, v != null ? segmentSvgService.finalRender(v) : null);
+                    converted.put(k, v != null ? switchSvgService.replaceLatexWithSvg(v) : null);
                 }
                 svgApplied.add(converted);
             }
