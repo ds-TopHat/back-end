@@ -19,5 +19,6 @@ public class KakaoResponseDTO {
         private String socialId;
         private Boolean isNew;
         private LoginType loginType;
+        private String name;
     }
 }

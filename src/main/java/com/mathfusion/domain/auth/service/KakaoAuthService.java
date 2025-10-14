@@ -7,9 +7,8 @@ import com.mathfusion.domain.user.converter.UserConverter;
 import com.mathfusion.domain.user.entity.RefreshToken;
 import com.mathfusion.domain.user.entity.User;
 import com.mathfusion.domain.user.entity.enums.LoginType;
-import com.mathfusion.domain.user.entity.enums.UserStatus;
-import com.mathfusion.domain.user.repository.RefreshTokenRepository;
 import com.mathfusion.domain.user.exception.UserException;
+import com.mathfusion.domain.user.repository.RefreshTokenRepository;
 import com.mathfusion.domain.user.repository.UserRepository;
 import com.mathfusion.domain.user.security.TokenProvider;
 import com.mathfusion.global.apiPayload.code.status.ErrorStatus;
@@ -57,7 +56,7 @@ public class KakaoAuthService {
 
             refreshTokenRepository.save(RefreshToken.builder()
                     .userId(user.getId())
-                    .token(jwtRefreshToken)
+                    .token(tokens.get("refresh_token"))
                     .build());
 
             return KakaoResponseDTO.KakaoLoginResponseDTO.builder()
@@ -71,7 +70,7 @@ public class KakaoAuthService {
             // 신규 가입 필요
             return KakaoResponseDTO.KakaoLoginResponseDTO.builder()
                     .email(userInfo.getEmail())
-                    .name(userInfo.getNickname())
+                    .name(userInfo.getEmail())
                     .socialId(userInfo.getId())
                     .loginType(LoginType.KAKAO)
                     .isNew(true)
@@ -95,12 +94,12 @@ public class KakaoAuthService {
                 Collections.emptyList()
         );
 
-        Map<String, String> tokens = generateTokens(user);
+        Map<String, String> tokens = generateTokens(savedUser);
 
         // DB에 Refresh Token 저장
         refreshTokenRepository.save(RefreshToken.builder()
                 .userId(savedUser.getId())
-                .token(refreshToken)
+                .token(tokens.get("refresh_token"))
                 .build());
 
         return KakaoResponseDTO.KakaoLoginResponseDTO.builder()
