@@ -75,6 +75,7 @@ public class SwitchSvgService {
             g2.dispose();
 
             StringWriter sw = new StringWriter();
+            svgGen.stream(sw, true);
             String svg = sw.toString()
                     .replace("font-family:'cmr10'", "font-family:'Noto Sans', sans-serif")
                     .replace("font-family:'cmmi10'", "font-family:'Noto Sans', sans-serif")
