@@ -3,6 +3,7 @@ package com.mathfusion.domain.ai.rendering;
 import com.aspose.tex.MathRendererOptions;
 import com.aspose.tex.SvgMathRenderer;
 import com.aspose.tex.SvgMathRendererOptions;
+import com.aspose.tex.rendering.SvgDevice;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -47,9 +48,7 @@ public class SegmentSvgService {
     private String renderWithAspose(String input) {
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             MathRendererOptions mathoptions = new SvgMathRendererOptions();
-            mathoptions.setPreamble("\\usepackage{amsmath}\n"
-                    + "\\usepackage{amsfonts}\n"
-                    + "\\usepackage{amssymb}");
+            mathoptions.setPreamble("\\usepackage{amsmath}\n\\usepackage{amssymb}");
             mathoptions.setScale(3000);
             mathoptions.setBackgroundColor(Color.WHITE);
             mathoptions.setTextColor(Color.BLACK);
@@ -57,10 +56,7 @@ public class SegmentSvgService {
             String latex = "$$" + input + "$$";
             new SvgMathRenderer().render(latex, out, mathoptions);
 
-            String svg = out.toString(StandardCharsets.UTF_8);
-            svg = svg.replaceAll("(?is)<text[^>]*>[\\s\\S]*?</text>", "");
-
-            return svg;
+            return out.toString(StandardCharsets.UTF_8);
         } catch (Exception e) {
             e.printStackTrace();
             return input;

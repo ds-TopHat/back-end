@@ -35,7 +35,10 @@ public class SwitchSvgService {
         StringBuffer sb = new StringBuffer();
         while (m.find()) {
             String latex = m.group(1).trim();
-            latex = sanitizeForMath(latex); // 비라틴 문자 제거
+            //
+            latex = latex.replaceAll("\\\\frac\\{([^}]+)\\}\\{([^}]+)\\}", "($1)/($2)");
+            latex = latex.replaceAll("\\\\sqrt\\{([^}]+)\\}", "√($1)");
+            //
             String svg = renderLatexToSvg(latex);
             String base64 = Base64.getEncoder().encodeToString(svg.getBytes(StandardCharsets.UTF_8));
             String imgTag = "<img alt=\"math\" src=\"data:image/svg+xml;base64," + base64 + "\" style=\"vertical-align:middle;\"/>"; // 보류

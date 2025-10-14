@@ -86,6 +86,7 @@ dependencies {
     implementation 'com.aspose:aspose-words:20.5:jdk17'
     implementation 'com.aspose:aspose-tex:25.8'
 
+
     // spring security OAuth2 클라이언트 의존성
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 }
