@@ -23,9 +23,29 @@ public class SwitchSvgService {
     // JSON 전체 문자열 순환 -> LaTeX -> SVG XML
     public String replaceLatexWithSvg(String finalJson){
         String working = finalJson;
+
         for(Pattern p : List.of(DOLLAR, DISPLAY, INLINE)){
             working = replacePattern(working, p);
         }
+        //  일반적인 LaTeX 토큰이 포함된 문장을 전부 렌더링 대상으로 간주
+        if (!working.contains("data:image/svg+xml")) {
+            Matcher m = Pattern.compile("([a-zA-Z0-9_{}^\\\\/*+\\-=×·√]+)").matcher(working);
+            StringBuffer sb = new StringBuffer();
+            while (m.find()) {
+                String latex = m.group(1);
+                if (latex.contains("^") || latex.contains("\\frac") || latex.contains("\\sqrt")) {
+                    String svg = renderLatexToSvg(latex);
+                    String base64 = Base64.getEncoder().encodeToString(svg.getBytes(StandardCharsets.UTF_8));
+                    String imgTag = "<img alt=\"math\" src=\"data:image/svg+xml;base64," + base64 + "\" style=\"vertical-align:middle;\"/>";
+                    m.appendReplacement(sb, Matcher.quoteReplacement(imgTag));
+                } else {
+                    m.appendReplacement(sb, Matcher.quoteReplacement(latex));
+                }
+            }
+            m.appendTail(sb);
+            working = sb.toString();
+        }
+
         return working;
     }
 
