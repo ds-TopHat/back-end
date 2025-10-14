@@ -32,7 +32,7 @@ public class SwitchSvgService {
         }
 
         if (!working.contains("data:image/svg+xml")) {
-            Matcher m = Pattern.compile("([a-zA-Z0-9_^{}\\\\/*+\\-·×√=()]+)").matcher(working);
+            Matcher m = Pattern.compile("([a-zA-Z0-9_^{}\\\\/*+\\-·×√=<>()]+)").matcher(working);
             StringBuffer sb = new StringBuffer();
             while (m.find()) {
                 String latex = m.group(1);
