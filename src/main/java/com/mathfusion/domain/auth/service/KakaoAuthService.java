@@ -67,12 +67,26 @@ public class KakaoAuthService {
                     .isNew(false)
                     .build();
         } else {
-            // 신규 가입 필요
-            return KakaoResponseDTO.KakaoLoginResponseDTO.builder()
+            // 신규 유저 → DB에 추가 후 refresh token 저장
+            User newUser = userRepository.save(User.builder()
                     .email(userInfo.getEmail())
-                    .name(userInfo.getEmail())
                     .socialId(userInfo.getId())
                     .loginType(LoginType.KAKAO)
+                    .build());
+
+            String accessToken = tokenProvider.createToken(String.valueOf(newUser.getId()));
+            String refreshToken = tokenProvider.createRefreshToken(String.valueOf(newUser.getId()));
+
+            refreshTokenRepository.save(RefreshToken.builder()
+                    .userId(newUser.getId())
+                    .token(refreshToken)
+                    .build());
+
+            return KakaoResponseDTO.KakaoLoginResponseDTO.builder()
+                    .access_token(accessToken)
+                    .refresh_token(refreshToken)
+                    .email(newUser.getEmail())
+                    .socialId(newUser.getSocialId())
                     .isNew(true)
                     .build();
         }
@@ -94,20 +108,22 @@ public class KakaoAuthService {
                 Collections.emptyList()
         );
 
-        Map<String, String> tokens = generateTokens(savedUser);
+        String accessToken = tokenProvider.createToken(String.valueOf(savedUser.getId()));
+        String refreshToken = tokenProvider.createRefreshToken(String.valueOf(savedUser.getId()));
 
-        // DB에 Refresh Token 저장
+        refreshTokenRepository.findByUserId(user.getId())
+                .ifPresent(refreshTokenRepository::delete);
+
         refreshTokenRepository.save(RefreshToken.builder()
-                .userId(savedUser.getId())
-                .token(tokens.get("refresh_token"))
+                .userId(user.getId())
+                .token(refreshToken)
                 .build());
 
         return KakaoResponseDTO.KakaoLoginResponseDTO.builder()
-                .access_token(tokens.get("access_token"))
-                .refresh_token(tokens.get("refresh_token"))
+                .access_token(accessToken)
+                .refresh_token(refreshToken)
                 .email(user.getEmail())
                 .socialId(user.getSocialId())
-                .loginType(savedUser.getLoginType())
                 .isNew(false)
                 .build();
     }
