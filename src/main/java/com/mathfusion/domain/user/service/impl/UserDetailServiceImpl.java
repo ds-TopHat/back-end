@@ -1,10 +1,9 @@
 package com.mathfusion.domain.user.service.impl;
 
-import com.mathfusion.global.apiPayload.code.status.ErrorStatus;
-import com.mathfusion.domain.user.entity.User;
 import com.mathfusion.domain.user.exception.UserException;
 import com.mathfusion.domain.user.repository.UserRepository;
 import com.mathfusion.domain.user.service.UserDetailService;
+import com.mathfusion.global.apiPayload.code.status.ErrorStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,16 +17,15 @@ public class UserDetailServiceImpl implements UserDetailService {
     private final UserRepository userRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String email) {
-        log.info("[UserDetails] 로드 시도: {}", email);
-
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> {
-                    log.error("[UserDetails] 사용자 없음: {}", email);
-                    return new UserException(ErrorStatus.USER_NOT_FOUND);
-                });
-
-        log.info("[UserDetails] 로드 성공: {} (비밀번호 길이: {})", email, user.getPassword().length());
-        return user; // User 엔티티가 UserDetails를 구현하므로 직접 반환
+    public UserDetails loadUserByUsername(String identifier) {
+        // identifier가 숫자면 userId로, 아니면 email로 처리
+        if (identifier.matches("\\d+")) {
+            Long id = Long.parseLong(identifier);
+            return userRepository.findById(id)
+                    .orElseThrow(() -> new UserException(ErrorStatus.USER_NOT_FOUND));
+        } else {
+            return userRepository.findByEmail(identifier)
+                    .orElseThrow(() -> new UserException(ErrorStatus.USER_NOT_FOUND));
+        }
     }
 }

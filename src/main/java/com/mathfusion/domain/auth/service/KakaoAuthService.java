@@ -9,8 +9,10 @@ import com.mathfusion.domain.user.entity.User;
 import com.mathfusion.domain.user.entity.enums.LoginType;
 import com.mathfusion.domain.user.entity.enums.UserStatus;
 import com.mathfusion.domain.user.repository.RefreshTokenRepository;
+import com.mathfusion.domain.user.exception.UserException;
 import com.mathfusion.domain.user.repository.UserRepository;
 import com.mathfusion.domain.user.security.TokenProvider;
+import com.mathfusion.global.apiPayload.code.status.ErrorStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -33,8 +35,8 @@ public class KakaoAuthService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final TokenProvider tokenProvider;
 
-    // 카카오 로그인 요청 처리
-    public KakaoResponseDTO.KakaoLoginResponseDTO processKakaoLogin(KakaoRequestDTO.KakaoLoginRequestDTO request){
+    // 카카오 인가코드 처리(isnew 여부)
+    public KakaoResponseDTO.KakaoLoginResponseDTO processKakaoLogin(KakaoRequestDTO.KakaoAuthCodeRequestDTO request){
         String kakaoAccessToken = request.getAccessToken();
         KakaoUserInfo userInfo = getUserInfo(kakaoAccessToken);
 
@@ -43,16 +45,11 @@ public class KakaoAuthService {
         if (userOpt.isPresent()) {
             User user = userOpt.get();
 
-            if (user.getStatus() == UserStatus.INACTIVE) {
-                throw new RuntimeException("탈퇴한 회원입니다.");
-            }
-
             Authentication authentication = new UsernamePasswordAuthenticationToken(
                     user.getId(), null, Collections.emptyList()
             );
 
-            String jwtAccessToken = tokenProvider.createToken(authentication.getName());
-            String jwtRefreshToken = tokenProvider.createRefreshToken(authentication.getName());
+            Map<String, String> tokens = generateTokens(user);
 
             // DB에 Refresh Token 저장
             refreshTokenRepository.findByUserId(user.getId())
@@ -64,10 +61,9 @@ public class KakaoAuthService {
                     .build());
 
             return KakaoResponseDTO.KakaoLoginResponseDTO.builder()
-                    .access_token(jwtAccessToken)
-                    .refresh_token(jwtRefreshToken)
+                    .access_token(tokens.get("access_token"))
+                    .refresh_token(tokens.get("refresh_token"))
                     .email(user.getEmail())
-                    .name(user.getName())
                     .socialId(user.getSocialId())
                     .isNew(false)
                     .build();
@@ -77,6 +73,7 @@ public class KakaoAuthService {
                     .email(userInfo.getEmail())
                     .name(userInfo.getNickname())
                     .socialId(userInfo.getId())
+                    .loginType(LoginType.KAKAO)
                     .isNew(true)
                     .build();
         }
@@ -86,20 +83,19 @@ public class KakaoAuthService {
     public KakaoResponseDTO.KakaoLoginResponseDTO signupKakaoMember(KakaoRequestDTO.KakaoSignupRequestDTO request){
 
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("이미 일반 회원가입을 완료한 사용자입니다.");
+            throw new UserException(ErrorStatus.ALREADY_REGISTERED_USER);
         }
 
         User user = UserConverter.toUser(request);
         User savedUser = userRepository.save(user);
 
         Authentication authentication = new UsernamePasswordAuthenticationToken(
-                savedUser.getId(), // ← savedUser 사용
+                savedUser.getId(),
                 null,
                 Collections.emptyList()
         );
 
-        String token = tokenProvider.createToken(authentication.getName());
-        String refreshToken = tokenProvider.createRefreshToken(authentication.getName());
+        Map<String, String> tokens = generateTokens(user);
 
         // DB에 Refresh Token 저장
         refreshTokenRepository.save(RefreshToken.builder()
@@ -108,8 +104,11 @@ public class KakaoAuthService {
                 .build());
 
         return KakaoResponseDTO.KakaoLoginResponseDTO.builder()
-                .access_token(token)
-                .refresh_token(refreshToken)
+                .access_token(tokens.get("access_token"))
+                .refresh_token(tokens.get("refresh_token"))
+                .email(user.getEmail())
+                .socialId(user.getSocialId())
+                .loginType(savedUser.getLoginType())
                 .isNew(false)
                 .build();
     }
@@ -135,10 +134,45 @@ public class KakaoAuthService {
         Map<String, Object> profile = (Map<String, Object>) kakaoAccount.getOrDefault("profile", Collections.emptyMap());
 
         String email = (String) kakaoAccount.get("email"); // null 가능
-        String nickname = (String) profile.getOrDefault("nickname", "");
         String id = String.valueOf(body.get("id"));
 
-        return new KakaoUserInfo(email, nickname, id);
+        return new KakaoUserInfo(email, id);
+    }
+
+    // 카카오 서비스 로그인
+    public KakaoResponseDTO.KakaoLoginResponseDTO loginKakaoMember(KakaoRequestDTO.KakaoLoginRequestDTO request) {
+        Optional<User> userOpt = userRepository.findBySocialIdAndLoginType(request.getSocialId(), LoginType.KAKAO);
+
+        if (userOpt.isEmpty()) {
+            throw new RuntimeException("가입되지 않은 회원입니다.");
+        }
+
+        User user = userOpt.get();
+
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+                user.getId(), null, Collections.emptyList()
+        );
+
+        Map<String, String> tokens = generateTokens(user);
+
+        return KakaoResponseDTO.KakaoLoginResponseDTO.builder()
+                .access_token(tokens.get("access_token"))
+                .refresh_token(tokens.get("refresh_token"))
+                .email(user.getEmail())
+                .socialId(user.getSocialId())
+                .isNew(false)
+                .loginType(LoginType.KAKAO)
+                .build();
+    }
+
+    private Map<String, String> generateTokens(User user) {
+        String jwtAccessToken = tokenProvider.createToken(String.valueOf(user.getId()));
+        String jwtRefreshToken = tokenProvider.createRefreshToken(String.valueOf(user.getId()));
+
+        return Map.of(
+                "access_token", jwtAccessToken,
+                "refresh_token", jwtRefreshToken
+        );
     }
 }
 

@@ -31,8 +31,9 @@ public class KakaoAuthController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON400", description = "잘못된 요청입니다.", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
     })
-    @PostMapping("/login")
-    public ApiResponse<KakaoResponseDTO.KakaoLoginResponseDTO> kakaoCallback(@RequestBody KakaoRequestDTO.KakaoLoginRequestDTO request) {
+    @PostMapping("/authcode")
+    public ApiResponse<KakaoResponseDTO.KakaoLoginResponseDTO> kakaoAuthCode(
+            @RequestBody KakaoRequestDTO.KakaoAuthCodeRequestDTO request) {
         return ApiResponse.onSuccess(kakaoAuthService.processKakaoLogin(request));
     }
 
@@ -53,5 +54,21 @@ public class KakaoAuthController {
         return ApiResponse.onSuccess(kakaoAuthService.signupKakaoMember(request));
     }
 
-
+    /**
+     * 카카오 로그인 api
+     */
+    @Operation(
+            summary = "카카오 로그인 요청 API",
+            description = "회원가입 완료한 카카오 회원의 로그인을 위한 API," +
+                    "소셜아이디를 이곳에 넣으세요"
+    )
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON400", description = "잘못된 요청입니다.", content = @Content(schema = @Schema(implementation = ApiResponse.class)))
+    })
+    @PostMapping("/login")
+    public ApiResponse<KakaoResponseDTO.KakaoLoginResponseDTO> kakaoLogin(
+            @RequestBody KakaoRequestDTO.KakaoLoginRequestDTO request) {
+        return ApiResponse.onSuccess(kakaoAuthService.loginKakaoMember(request));
+    }
 }

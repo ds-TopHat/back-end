@@ -78,9 +78,9 @@ public class UserController {
                 return ResponseEntity.status(401).body("유효하지 않은 토큰입니다.");
             }
 
-            String email = jwtUtil.getEmailFromToken(token);
+            String identifier = jwtUtil.getEmailFromToken(token);
 
-            userService.deleteByEmail(email);
+            userService.deleteByIdentifier(identifier);
 
             return ResponseEntity.ok("회원탈퇴 완료");
         } catch (UserException e) {

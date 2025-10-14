@@ -4,6 +4,7 @@ import com.mathfusion.domain.user.dto.UserRequest;
 import com.mathfusion.domain.user.entity.EmailVerification;
 import com.mathfusion.domain.user.entity.User;
 import com.mathfusion.domain.user.entity.enums.LoginType;
+import com.mathfusion.domain.user.entity.enums.UserStatus;
 import com.mathfusion.domain.user.exception.EmailErrorCode;
 import com.mathfusion.domain.user.exception.EmailException;
 import com.mathfusion.domain.user.exception.UserException;
@@ -48,6 +49,7 @@ public class UserServiceImpl implements UserService {
                 .email(email)
                 .password(bCryptPasswordEncoder.encode(dto.getPassword()))
                 .loginType(LoginType.NORMAL)
+                .status(UserStatus.ACTIVE)
                 .build();
 
         try {
@@ -63,13 +65,14 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public void deleteByEmail(String email) {
-        log.info("[Delete] 회원탈퇴 시도: {}", email);
-
-        User user = userRepository.findByEmail(email)
+    @Transactional
+    public void deleteByIdentifier(String identifier) {
+        User user = identifier.matches("\\d+")
+                ? userRepository.findById(Long.parseLong(identifier))
+                .orElseThrow(() -> new UserException(ErrorStatus.USER_NOT_FOUND))
+                : userRepository.findByEmail(identifier)
                 .orElseThrow(() -> new UserException(ErrorStatus.USER_NOT_FOUND));
 
         userRepository.delete(user);
-        log.info("[Delete] 회원탈퇴 완료: {}", email);
     }
 }
