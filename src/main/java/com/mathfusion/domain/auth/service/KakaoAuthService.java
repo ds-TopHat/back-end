@@ -4,9 +4,11 @@ import com.mathfusion.domain.auth.dto.KakaoRequestDTO;
 import com.mathfusion.domain.auth.dto.KakaoResponseDTO;
 import com.mathfusion.domain.auth.dto.KakaoUserInfo;
 import com.mathfusion.domain.user.converter.UserConverter;
+import com.mathfusion.domain.user.entity.RefreshToken;
 import com.mathfusion.domain.user.entity.User;
 import com.mathfusion.domain.user.entity.enums.LoginType;
 import com.mathfusion.domain.user.entity.enums.UserStatus;
+import com.mathfusion.domain.user.repository.RefreshTokenRepository;
 import com.mathfusion.domain.user.repository.UserRepository;
 import com.mathfusion.domain.user.security.TokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,7 @@ import java.util.Optional;
 public class KakaoAuthService {
 
     private final UserRepository userRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final TokenProvider tokenProvider;
 
     // 카카오 로그인 요청 처리
@@ -51,6 +54,15 @@ public class KakaoAuthService {
             String jwtAccessToken = tokenProvider.createToken(authentication.getName());
             String jwtRefreshToken = tokenProvider.createRefreshToken(authentication.getName());
 
+            // DB에 Refresh Token 저장
+            refreshTokenRepository.findByUserId(user.getId())
+                    .ifPresent(refreshTokenRepository::delete);
+
+            refreshTokenRepository.save(RefreshToken.builder()
+                    .userId(user.getId())
+                    .token(jwtRefreshToken)
+                    .build());
+
             return KakaoResponseDTO.KakaoLoginResponseDTO.builder()
                     .access_token(jwtAccessToken)
                     .refresh_token(jwtRefreshToken)
@@ -62,7 +74,7 @@ public class KakaoAuthService {
         } else {
             // 신규 가입 필요
             return KakaoResponseDTO.KakaoLoginResponseDTO.builder()
-                    .email(userInfo.getEmail())          // null일 수도 있음(프론트에서 별도 입력받도록 UX 고려)
+                    .email(userInfo.getEmail())
                     .name(userInfo.getNickname())
                     .socialId(userInfo.getId())
                     .isNew(true)
@@ -88,6 +100,12 @@ public class KakaoAuthService {
 
         String token = tokenProvider.createToken(authentication.getName());
         String refreshToken = tokenProvider.createRefreshToken(authentication.getName());
+
+        // DB에 Refresh Token 저장
+        refreshTokenRepository.save(RefreshToken.builder()
+                .userId(savedUser.getId())
+                .token(refreshToken)
+                .build());
 
         return KakaoResponseDTO.KakaoLoginResponseDTO.builder()
                 .access_token(token)
