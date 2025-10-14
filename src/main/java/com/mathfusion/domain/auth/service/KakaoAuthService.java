@@ -4,8 +4,11 @@ import com.mathfusion.domain.auth.dto.KakaoRequestDTO;
 import com.mathfusion.domain.auth.dto.KakaoResponseDTO;
 import com.mathfusion.domain.auth.dto.KakaoUserInfo;
 import com.mathfusion.domain.user.converter.UserConverter;
+import com.mathfusion.domain.user.entity.RefreshToken;
 import com.mathfusion.domain.user.entity.User;
 import com.mathfusion.domain.user.entity.enums.LoginType;
+import com.mathfusion.domain.user.entity.enums.UserStatus;
+import com.mathfusion.domain.user.repository.RefreshTokenRepository;
 import com.mathfusion.domain.user.exception.UserException;
 import com.mathfusion.domain.user.repository.UserRepository;
 import com.mathfusion.domain.user.security.TokenProvider;
@@ -29,6 +32,7 @@ import java.util.Optional;
 public class KakaoAuthService {
 
     private final UserRepository userRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final TokenProvider tokenProvider;
 
     // 카카오 인가코드 처리(isnew 여부)
@@ -47,6 +51,15 @@ public class KakaoAuthService {
 
             Map<String, String> tokens = generateTokens(user);
 
+            // DB에 Refresh Token 저장
+            refreshTokenRepository.findByUserId(user.getId())
+                    .ifPresent(refreshTokenRepository::delete);
+
+            refreshTokenRepository.save(RefreshToken.builder()
+                    .userId(user.getId())
+                    .token(jwtRefreshToken)
+                    .build());
+
             return KakaoResponseDTO.KakaoLoginResponseDTO.builder()
                     .access_token(tokens.get("access_token"))
                     .refresh_token(tokens.get("refresh_token"))
@@ -58,6 +71,7 @@ public class KakaoAuthService {
             // 신규 가입 필요
             return KakaoResponseDTO.KakaoLoginResponseDTO.builder()
                     .email(userInfo.getEmail())
+                    .name(userInfo.getNickname())
                     .socialId(userInfo.getId())
                     .loginType(LoginType.KAKAO)
                     .isNew(true)
@@ -82,6 +96,12 @@ public class KakaoAuthService {
         );
 
         Map<String, String> tokens = generateTokens(user);
+
+        // DB에 Refresh Token 저장
+        refreshTokenRepository.save(RefreshToken.builder()
+                .userId(savedUser.getId())
+                .token(refreshToken)
+                .build());
 
         return KakaoResponseDTO.KakaoLoginResponseDTO.builder()
                 .access_token(tokens.get("access_token"))
