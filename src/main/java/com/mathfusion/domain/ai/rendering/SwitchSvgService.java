@@ -58,10 +58,7 @@ public class SwitchSvgService {
     private String renderLatexToSvg(String latex){
         try{
             // implementation 'org.scilab.forge:jlatexmath:1.0.7'
-            var formula = new org.scilab.forge.jlatexmath.TeXFormula(
-                    "\\usepackage{amsmath}\n" +
-                    "\\usepackage{amssymb}\n" +
-                            latex);
+            var formula = new org.scilab.forge.jlatexmath.TeXFormula(latex);
             var icon = formula.createTeXIcon(org.scilab.forge.jlatexmath.TeXConstants.STYLE_DISPLAY, 20);
             icon.setInsets(new Insets(2,2,2,2));
 
@@ -76,15 +73,7 @@ public class SwitchSvgService {
 
             StringWriter sw = new StringWriter();
             svgGen.stream(sw, true);
-            sw.flush();
-
-            String svg = sw.toString()
-                    .replace("font-family:'cmr10'", "font-family:'Noto Sans', sans-serif")
-                    .replace("font-family:'cmmi10'", "font-family:'Noto Sans', sans-serif")
-                    .replace("font-family:'cmsy10'", "font-family:'Noto Sans', sans-serif")
-                    .replace("font-family:'cmex10'", "font-family:'Noto Sans', sans-serif");
-
-            return svg;
+            return sw.toString();
         }catch(Exception e){
             return "<svg xmlns=\"http://www.w3.org/2000/svg\"><text>" + latex + "</text></svg>";
         }
