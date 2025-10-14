@@ -46,20 +46,21 @@ public class SegmentSvgService {
     // Aspose 호출
     private String renderWithAspose(String input) {
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            MathRendererOptions options = new SvgMathRendererOptions();
-            options.setPreamble("\\usepackage{amsmath}\n"
+            MathRendererOptions mathoptions = new SvgMathRendererOptions();
+            mathoptions.setPreamble("\\usepackage{amsmath}\n"
                     + "\\usepackage{amsfonts}\n"
                     + "\\usepackage{amssymb}");
-            options.setScale(3000);
-            options.setBackgroundColor(Color.WHITE);
-            options.setTextColor(Color.BLACK);
+            mathoptions.setScale(3000);
+            mathoptions.setBackgroundColor(Color.WHITE);
+            mathoptions.setTextColor(Color.BLACK);
 
             String latex = "$$" + input + "$$";
-            // String latex = "\\(" + input + "\\)";
+            new SvgMathRenderer().render(latex, out, mathoptions);
 
-            new SvgMathRenderer().render(latex, out, options);
+            String svg = out.toString(StandardCharsets.UTF_8);
+            svg = svg.replaceAll("(?is)<text[^>]*>[\\s\\S]*?</text>", "");
 
-            return out.toString(StandardCharsets.UTF_8);
+            return svg;
         } catch (Exception e) {
             e.printStackTrace();
             return input;
