@@ -38,6 +38,12 @@ public class SwitchSvgService {
             //
             latex = latex.replaceAll("\\\\frac\\{([^}]+)\\}\\{([^}]+)\\}", "($1)/($2)");
             latex = latex.replaceAll("\\\\sqrt\\{([^}]+)\\}", "√($1)");
+            latex = latex.replaceAll("\\\\cdot", "·");
+            latex = latex.replaceAll("\\\\times", "×");
+            latex = latex.replaceAll("\\\\log", "log");
+            latex = latex.replaceAll("\\\\sin", "sin");
+            latex = latex.replaceAll("\\\\cos", "cos");
+            latex = latex.replaceAll("\\\\tan", "tan");
             //
             String svg = renderLatexToSvg(latex);
             String base64 = Base64.getEncoder().encodeToString(svg.getBytes(StandardCharsets.UTF_8));

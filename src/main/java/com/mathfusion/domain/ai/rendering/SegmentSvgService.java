@@ -3,13 +3,13 @@ package com.mathfusion.domain.ai.rendering;
 import com.aspose.tex.MathRendererOptions;
 import com.aspose.tex.SvgMathRenderer;
 import com.aspose.tex.SvgMathRendererOptions;
-import com.aspose.tex.rendering.SvgDevice;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.regex.Pattern;
 
 
 @Service
@@ -30,18 +30,10 @@ public class SegmentSvgService {
 
     // 변환 안되고 있는 라텍스 후보
     private boolean containsLatex(String text){
-        return text.contains("\\frac") ||
-                text.contains("\\sqrt") ||
-                text.contains("\\sum") ||
-                text.contains("\\int") ||
-                text.contains("\\times") ||
-                text.contains("\\cdot") ||
-                text.contains("\\log") ||
-                text.contains("\\sin") ||
-                text.contains("\\cos") ||
-                text.contains("\\tan") ||
-                text.contains("^") ||  // 지수
-                text.contains("_");   // 아래첨자
+        return Pattern.compile("\\\\(sum|int|log|cdot|times|sin|cos|tan|lim)\\b").matcher(text).find()
+                || text.contains("\\underset")
+                || text.contains("\\overset")
+                || Pattern.compile("[\\^_]").matcher(text).find();
     }
 
     // Aspose 호출
