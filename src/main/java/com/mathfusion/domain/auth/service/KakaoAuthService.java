@@ -10,7 +10,7 @@ import com.mathfusion.domain.user.entity.enums.LoginType;
 import com.mathfusion.domain.user.exception.UserException;
 import com.mathfusion.domain.user.repository.RefreshTokenRepository;
 import com.mathfusion.domain.user.repository.UserRepository;
-import com.mathfusion.domain.user.security.TokenProvider;
+import com.mathfusion.domain.user.security.JwtUtil;
 import com.mathfusion.global.apiPayload.code.status.ErrorStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
@@ -32,7 +32,7 @@ public class KakaoAuthService {
 
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
-    private final TokenProvider tokenProvider;
+    private final JwtUtil jwtUtil;
 
     // 카카오 인가코드 처리(isnew 여부)
     public KakaoResponseDTO.KakaoLoginResponseDTO processKakaoLogin(KakaoRequestDTO.KakaoAuthCodeRequestDTO request){
@@ -74,8 +74,8 @@ public class KakaoAuthService {
                     .loginType(LoginType.KAKAO)
                     .build());
 
-            String accessToken = tokenProvider.createToken(String.valueOf(newUser.getId()));
-            String refreshToken = tokenProvider.createRefreshToken(String.valueOf(newUser.getId()));
+            String accessToken = jwtUtil.generateToken(newUser.getEmail());
+            String refreshToken = jwtUtil.generateRefreshToken(newUser.getEmail());
 
             refreshTokenRepository.save(RefreshToken.builder()
                     .userId(newUser.getId())
@@ -108,8 +108,8 @@ public class KakaoAuthService {
                 Collections.emptyList()
         );
 
-        String accessToken = tokenProvider.createToken(String.valueOf(savedUser.getId()));
-        String refreshToken = tokenProvider.createRefreshToken(String.valueOf(savedUser.getId()));
+        String accessToken = jwtUtil.generateToken(savedUser.getEmail());
+        String refreshToken = jwtUtil.generateRefreshToken(savedUser.getEmail());
 
         refreshTokenRepository.findByUserId(user.getId())
                 .ifPresent(refreshTokenRepository::delete);
@@ -181,8 +181,8 @@ public class KakaoAuthService {
     }
 
     private Map<String, String> generateTokens(User user) {
-        String jwtAccessToken = tokenProvider.createToken(String.valueOf(user.getId()));
-        String jwtRefreshToken = tokenProvider.createRefreshToken(String.valueOf(user.getId()));
+        String jwtAccessToken = jwtUtil.generateToken(user.getEmail());
+        String jwtRefreshToken = jwtUtil.generateRefreshToken(user.getEmail());
 
         return Map.of(
                 "access_token", jwtAccessToken,
