@@ -75,8 +75,13 @@ public class SwitchSvgService {
             g2.dispose();
 
             StringWriter sw = new StringWriter();
-            svgGen.stream(sw, true);
-            return sw.toString();
+            String svg = sw.toString()
+                    .replace("font-family:'cmr10'", "font-family:'Noto Sans', sans-serif")
+                    .replace("font-family:'cmmi10'", "font-family:'Noto Sans', sans-serif")
+                    .replace("font-family:'cmsy10'", "font-family:'Noto Sans', sans-serif")
+                    .replace("font-family:'cmex10'", "font-family:'Noto Sans', sans-serif");
+
+            return svg;
         }catch(Exception e){
             return "<svg xmlns=\"http://www.w3.org/2000/svg\"><text>" + latex + "</text></svg>";
         }
