@@ -18,6 +18,8 @@ public class SwitchSvgService {
     private static final Pattern DISPLAY = Pattern.compile("\\\\\\[(.+?)\\\\\\]", Pattern.DOTALL);
     private static final Pattern DOLLAR  = Pattern.compile("\\$\\$(.+?)\\$\\$", Pattern.DOTALL);
 
+    private static final Pattern NON_LATIN = Pattern.compile("[\\p{IsHangul}\\p{InCJKUnifiedIdeographs}\\p{InHiragana}\\p{InKatakana}]+");
+
     // JSON 전체 문자열 순환 -> LaTeX -> SVG XML
     public String replaceLatexWithSvg(String finalJson){
         String working = finalJson;
@@ -33,6 +35,7 @@ public class SwitchSvgService {
         StringBuffer sb = new StringBuffer();
         while (m.find()) {
             String latex = m.group(1).trim();
+            latex = sanitizeForMath(latex); // 비라틴 문자 제거
             String svg = renderLatexToSvg(latex);
             String base64 = Base64.getEncoder().encodeToString(svg.getBytes(StandardCharsets.UTF_8));
             String imgTag = "<img alt=\"math\" src=\"data:image/svg+xml;base64," + base64 + "\" style=\"vertical-align:middle;\"/>"; // 보류
@@ -68,5 +71,11 @@ public class SwitchSvgService {
         }catch(Exception e){
             return "<svg xmlns=\"http://www.w3.org/2000/svg\"><text>" + latex + "</text></svg>";
         }
+    }
+
+    // 한글/비라틴 제거
+    private String sanitizeForMath(String s) {
+        // 수식 내부에 섞인 한글은 제거(또는 필요시 \text{...}로 치환)
+        return NON_LATIN.matcher(s).replaceAll("");
     }
 }
