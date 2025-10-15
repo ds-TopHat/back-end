@@ -13,6 +13,7 @@ import com.mathfusion.domain.user.repository.UserRepository;
 import com.mathfusion.domain.user.security.JwtUtil;
 import com.mathfusion.global.apiPayload.code.status.ErrorStatus;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -26,6 +27,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class KakaoAuthService {
@@ -34,7 +36,7 @@ public class KakaoAuthService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtUtil jwtUtil;
 
-    // 카카오 인가코드 처리(isnew 여부)
+    // 카카오 인가코드 처리 (isNew 여부)
     public KakaoResponseDTO.KakaoLoginResponseDTO processKakaoLogin(KakaoRequestDTO.KakaoAuthCodeRequestDTO request){
         String kakaoAccessToken = request.getAccessToken();
         KakaoUserInfo userInfo = getUserInfo(kakaoAccessToken);
@@ -50,7 +52,7 @@ public class KakaoAuthService {
 
             Map<String, String> tokens = generateTokens(user);
 
-            // DB에 Refresh Token 저장
+            // 기존 Refresh Token 삭제 후 저장
             refreshTokenRepository.findByUserId(user.getId())
                     .ifPresent(refreshTokenRepository::delete);
 
@@ -65,6 +67,7 @@ public class KakaoAuthService {
                     .email(user.getEmail())
                     .socialId(user.getSocialId())
                     .isNew(false)
+                    .loginType(LoginType.KAKAO)
                     .build();
         } else {
             // 신규 유저 → DB에 추가 후 refresh token 저장
@@ -88,13 +91,13 @@ public class KakaoAuthService {
                     .email(newUser.getEmail())
                     .socialId(newUser.getSocialId())
                     .isNew(true)
+                    .loginType(LoginType.KAKAO)
                     .build();
         }
     }
 
     // 카카오 회원가입
     public KakaoResponseDTO.KakaoLoginResponseDTO signupKakaoMember(KakaoRequestDTO.KakaoSignupRequestDTO request){
-
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new UserException(ErrorStatus.ALREADY_REGISTERED_USER);
         }
@@ -111,6 +114,7 @@ public class KakaoAuthService {
         String accessToken = jwtUtil.generateToken(savedUser.getEmail());
         String refreshToken = jwtUtil.generateRefreshToken(savedUser.getEmail());
 
+        // 기존 Refresh Token 삭제 후 저장
         refreshTokenRepository.findByUserId(user.getId())
                 .ifPresent(refreshTokenRepository::delete);
 
@@ -125,36 +129,43 @@ public class KakaoAuthService {
                 .email(user.getEmail())
                 .socialId(user.getSocialId())
                 .isNew(false)
+                .loginType(LoginType.KAKAO)
+                .name(request.getName())
                 .build();
     }
 
-    // 카카오에서 발급받은 access 토큰을 이용해서 사용자 정보 요청하는 메서드
+    // 카카오 사용자 정보 조회
     private KakaoUserInfo getUserInfo(String accessToken) {
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(accessToken);
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(accessToken);
 
-        HttpEntity<String> request = new HttpEntity<>(headers);
-        ResponseEntity<Map> response = restTemplate.exchange(
-                "https://kapi.kakao.com/v2/user/me",
-                HttpMethod.GET,
-                request,
-                Map.class
-        );
+            HttpEntity<String> request = new HttpEntity<>(headers);
+            ResponseEntity<Map> response = restTemplate.exchange(
+                    "https://kapi.kakao.com/v2/user/me",
+                    HttpMethod.GET,
+                    request,
+                    Map.class
+            );
 
-        Map<String, Object> body = response.getBody();
-        if (body == null) throw new RuntimeException("카카오 응답이 비어있습니다.");
+            Map<String, Object> body = response.getBody();
+            if (body == null) throw new RuntimeException("카카오 응답이 비어있습니다.");
 
-        Map<String, Object> kakaoAccount = (Map<String, Object>) body.getOrDefault("kakao_account", Collections.emptyMap());
-        Map<String, Object> profile = (Map<String, Object>) kakaoAccount.getOrDefault("profile", Collections.emptyMap());
+            Map<String, Object> kakaoAccount = (Map<String, Object>) body.getOrDefault("kakao_account", Collections.emptyMap());
+            Map<String, Object> profile = (Map<String, Object>) kakaoAccount.getOrDefault("profile", Collections.emptyMap());
 
-        String email = (String) kakaoAccount.get("email"); // null 가능
-        String id = String.valueOf(body.get("id"));
+            String email = (String) kakaoAccount.get("email"); // null 가능
+            String id = String.valueOf(body.get("id"));
 
-        return new KakaoUserInfo(email, id);
+            return new KakaoUserInfo(email, id);
+        } catch (Exception e) {
+            log.error("[KakaoAuthService] 카카오 사용자 정보 조회 실패: {}", e.getMessage(), e);
+            throw new RuntimeException("카카오 사용자 정보 조회 실패: " + e.getMessage());
+        }
     }
 
-    // 카카오 서비스 로그인
+    // 카카오 로그인
     public KakaoResponseDTO.KakaoLoginResponseDTO loginKakaoMember(KakaoRequestDTO.KakaoLoginRequestDTO request) {
         Optional<User> userOpt = userRepository.findBySocialIdAndLoginType(request.getSocialId(), LoginType.KAKAO);
 
@@ -163,7 +174,6 @@ public class KakaoAuthService {
         }
 
         User user = userOpt.get();
-
         Authentication authentication = new UsernamePasswordAuthenticationToken(
                 user.getId(), null, Collections.emptyList()
         );
@@ -180,6 +190,7 @@ public class KakaoAuthService {
                 .build();
     }
 
+    // 토큰 생성
     private Map<String, String> generateTokens(User user) {
         String jwtAccessToken = jwtUtil.generateToken(user.getEmail());
         String jwtRefreshToken = jwtUtil.generateRefreshToken(user.getEmail());
@@ -190,4 +201,3 @@ public class KakaoAuthService {
         );
     }
 }
-
