@@ -104,10 +104,15 @@ public class SwitchSvgService {
     private String sanitizeForMath(String s) {
         s= NON_LATIN.matcher(s).replaceAll("");
         // 분수표현 자동변환
-        s = s.replaceAll("([a-zA-Z0-9_^{}\\\\/*+\\-·×√=<>()]+)", "\\\\frac{$1}{$2}");
-
-        s = s.replaceAll("(?<!\\\\)frac", "\\\\frac");
+        try {
+            if (s.matches(".*[a-zA-Z0-9]+\\s*/\\s*[a-zA-Z0-9]+.*")) {
+                s = s.replaceAll("([a-zA-Z0-9]+)\\s*/\\s*([a-zA-Z0-9]+)", "\\\\frac{$1}{$2}");
+            }
+        } catch (Exception e) {
+            log.warn("sanitizeForMath fraction replace skipped: {}", s);
+        }
         s = s.replaceAll("(?<!\\\\)sqrt", "\\\\sqrt");
+        s = s.replaceAll("(?<!\\\\)frac", "\\\\frac");
         return s;
     }
 }
