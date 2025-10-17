@@ -102,6 +102,12 @@ public class SwitchSvgService {
     }
 
     private String sanitizeForMath(String s) {
-        return NON_LATIN.matcher(s).replaceAll("");
+        s= NON_LATIN.matcher(s).replaceAll("");
+        // 분수표현 자동변환
+        s = s.replaceAll("([a-zA-Z0-9_^{}\\\\/*+\\-·×√=<>()]+)", "\\\\frac{$1}{$2}");
+
+        s = s.replaceAll("(?<!\\\\)frac", "\\\\frac");
+        s = s.replaceAll("(?<!\\\\)sqrt", "\\\\sqrt");
+        return s;
     }
 }
