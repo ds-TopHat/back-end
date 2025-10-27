@@ -94,9 +94,7 @@ public class SwitchSvgService {
                     .replace("font-family:'cmmi10'", "font-family:'Noto Sans', sans-serif")
                     .replace("font-family:'cmsy10'", "font-family:'Noto Sans', sans-serif")
                     .replace("font-family:'cmex10'", "font-family:'Noto Sans', sans-serif")
-                    .replace("&", "&amp;")
-                    .replace("<", "&lt;")
-                    .replace(">", "&gt;");
+                    .replace("&", "&amp;");
 
             return svg;
         } catch (Exception e) {
