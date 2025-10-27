@@ -104,6 +104,7 @@ public class SwitchSvgService {
 
     private String sanitizeForMath(String s) {
         s= NON_LATIN.matcher(s).replaceAll("");
+        s = s.replace("−", "-");
         // 분수 표현 자동변환
         try {
             if (s.matches(".*[a-zA-Z0-9]+\\s*/\\s*[a-zA-Z0-9]+.*")) {
@@ -116,8 +117,9 @@ public class SwitchSvgService {
         s = s.replaceAll("(?<!\\\\)sqrt", "\\\\sqrt");
         s = s.replaceAll("(?<!\\\\)frac", "\\\\frac");
 
-        s = s.replaceAll("\\\\[;!,:]", "");  // 공백/간격 명령 제거
-        s = s.replaceAll("\\\\i", "i");      // \i → i
+        s = s.replaceAll("\\\\[;!,:]", "");
+
+        s = s.replaceAll("\\\\i", "i");
         return s;
     }
 }
