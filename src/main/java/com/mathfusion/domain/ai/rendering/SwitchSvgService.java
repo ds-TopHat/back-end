@@ -5,8 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -88,8 +86,6 @@ public class SwitchSvgService {
             icon.paintIcon(null, g2, 0, 0);
             g2.dispose();
 
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            OutputStreamWriter writer = new OutputStreamWriter(out, StandardCharsets.UTF_8);
             StringWriter sw = new StringWriter();
             svgGen.stream(sw, true);
             sw.flush();
@@ -109,7 +105,7 @@ public class SwitchSvgService {
 
     private String sanitizeForMath(String s) {
         s= NON_LATIN.matcher(s).replaceAll("");
-        s = s.replace("−", "-");
+        s = s.replace(";", " ");
         // 분수 표현 자동변환
         try {
             if (s.matches(".*[a-zA-Z0-9]+\\s*/\\s*[a-zA-Z0-9]+.*")) {
