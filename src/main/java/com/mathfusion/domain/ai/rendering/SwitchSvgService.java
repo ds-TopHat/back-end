@@ -104,7 +104,7 @@ public class SwitchSvgService {
 
     private String sanitizeForMath(String s) {
         s= NON_LATIN.matcher(s).replaceAll("");
-        // 분수표현 자동변환
+        // 분수 표현 자동변환
         try {
             if (s.matches(".*[a-zA-Z0-9]+\\s*/\\s*[a-zA-Z0-9]+.*")) {
                 s = s.replaceAll("([a-zA-Z0-9]+)\\s*/\\s*([a-zA-Z0-9]+)", "\\\\frac{$1}{$2}");
@@ -112,8 +112,12 @@ public class SwitchSvgService {
         } catch (Exception e) {
             log.warn("sanitizeForMath fraction replace skipped: {}", s);
         }
+
         s = s.replaceAll("(?<!\\\\)sqrt", "\\\\sqrt");
         s = s.replaceAll("(?<!\\\\)frac", "\\\\frac");
+
+        s = s.replaceAll("\\\\[;!,:]", "");  // 공백/간격 명령 제거
+        s = s.replaceAll("\\\\i", "i");      // \i → i
         return s;
     }
 }
