@@ -7,6 +7,7 @@ import com.mathfusion.domain.user.converter.UserConverter;
 import com.mathfusion.domain.user.entity.RefreshToken;
 import com.mathfusion.domain.user.entity.User;
 import com.mathfusion.domain.user.entity.enums.LoginType;
+import com.mathfusion.domain.user.entity.enums.UserStatus;
 import com.mathfusion.domain.user.exception.UserException;
 import com.mathfusion.domain.user.repository.RefreshTokenRepository;
 import com.mathfusion.domain.user.repository.UserRepository;
@@ -75,6 +76,7 @@ public class KakaoAuthService {
                     .email(userInfo.getEmail())
                     .socialId(userInfo.getId())
                     .loginType(LoginType.KAKAO)
+                    .status(UserStatus.ACTIVE)
                     .build());
 
             String accessToken = jwtUtil.generateToken(newUser.getEmail());
