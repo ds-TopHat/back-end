@@ -3,7 +3,10 @@ package com.mathfusion.domain.ai.rendering;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
 import java.awt.*;
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -85,16 +88,18 @@ public class SwitchSvgService {
             icon.paintIcon(null, g2, 0, 0);
             g2.dispose();
 
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            OutputStreamWriter writer = new OutputStreamWriter(out, StandardCharsets.UTF_8);
             StringWriter sw = new StringWriter();
             svgGen.stream(sw, true);
             sw.flush();
 
             String svg = sw.toString()
-                    .replace("font-family:'cmr10'", "font-family:'Noto Sans', sans-serif")
-                    .replace("font-family:'cmmi10'", "font-family:'Noto Sans', sans-serif")
-                    .replace("font-family:'cmsy10'", "font-family:'Noto Sans', sans-serif")
-                    .replace("font-family:'cmex10'", "font-family:'Noto Sans', sans-serif")
-                    .replace("&", "&amp;");
+                    .replace("font-family:'cmr10'", "font-family:'Noto Sans Symbols', 'DejaVu Sans', sans-serif")
+                    .replace("font-family:'cmmi10'", "font-family:'Noto Sans Symbols', 'DejaVu Sans', sans-serif")
+                    .replace("font-family:'cmsy10'", "font-family:'Noto Sans Symbols', 'DejaVu Sans', sans-serif")
+                    .replace("font-family:'cmex10'", "font-family:'Noto Sans Symbols', 'DejaVu Sans', sans-serif")
+                    .replace("−", "-");
 
             return svg;
         } catch (Exception e) {
