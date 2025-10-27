@@ -80,6 +80,7 @@ public class SwitchSvgService {
             var domImpl = org.apache.batik.dom.GenericDOMImplementation.getDOMImplementation();
             var document = domImpl.createDocument("http://www.w3.org/2000/svg", "svg", null);
             var svgGen = new org.apache.batik.svggen.SVGGraphics2D(document);
+            svgGen.getGeneratorContext().setEmbeddedFontsOn(true);
             svgGen.setSVGCanvasSize(new Dimension(icon.getIconWidth(), icon.getIconHeight()));
 
             Graphics2D g2 = (Graphics2D) svgGen.create();
@@ -87,16 +88,14 @@ public class SwitchSvgService {
             g2.dispose();
 
             StringWriter sw = new StringWriter();
-            svgGen.stream(sw, true);
+            svgGen.stream(sw, false);
             sw.flush();
 
             String svg = sw.toString()
-                    .replace("font-family:'cmr10'", "font-family:'Noto Sans Symbols', 'DejaVu Sans', sans-serif")
-                    .replace("font-family:'cmmi10'", "font-family:'Noto Sans Symbols', 'DejaVu Sans', sans-serif")
-                    .replace("font-family:'cmsy10'", "font-family:'Noto Sans Symbols', 'DejaVu Sans', sans-serif")
-                    .replace("font-family:'cmex10'", "font-family:'Noto Sans Symbols', 'DejaVu Sans', sans-serif")
-                    .replace("−", "-")
-                    .replace(";", " ");
+                    .replace("font-family:'cmr10'", "font-family:'STIXGeneral','Latin Modern Math','DejaVu Sans',sans-serif")
+                    .replace("font-family:'cmmi10'", "font-family:'STIXGeneral','Latin Modern Math','DejaVu Sans',sans-serif")
+                    .replace("font-family:'cmsy10'", "font-family:'STIXGeneral','Latin Modern Math','DejaVu Sans',sans-serif")
+                    .replace("font-family:'cmex10'", "font-family:'STIXGeneral','Latin Modern Math','DejaVu Sans',sans-serif");
 
             return svg;
         } catch (Exception e) {
