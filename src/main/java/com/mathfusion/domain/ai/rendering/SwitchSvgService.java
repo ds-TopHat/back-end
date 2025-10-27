@@ -95,7 +95,8 @@ public class SwitchSvgService {
                     .replace("font-family:'cmmi10'", "font-family:'Noto Sans Symbols', 'DejaVu Sans', sans-serif")
                     .replace("font-family:'cmsy10'", "font-family:'Noto Sans Symbols', 'DejaVu Sans', sans-serif")
                     .replace("font-family:'cmex10'", "font-family:'Noto Sans Symbols', 'DejaVu Sans', sans-serif")
-                    .replace("−", "-");
+                    .replace("−", "-")
+                    .replace(";", " ");
 
             return svg;
         } catch (Exception e) {
