@@ -81,7 +81,7 @@ dependencies {
     implementation 'org.apache.pdfbox:pdfbox:2.0.29'
 
     // LateX to SVG
-    implementation 'org.scilab.forge:jlatexmath:1.0.7'
+    ilementation 'org.scilab.forge:jlatexmath:1.0.7'
     implementation 'org.apache.xmlgraphics:batik-all:1.17'
 
 
