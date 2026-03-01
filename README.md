@@ -16,20 +16,15 @@ mATH+API는 멀티모달 AI 모델을 활용하여
 
 ## 🖼 Service Preview
 
-<p align="center">
-  <img width="1206" src="https://github.com/user-attachments/assets/8f9602ca-2dd6-4d91-8286-d3f02553aeee" />
-</p>
-
-<p align="center">
-  <img width="882" src="https://github.com/user-attachments/assets/59d51b65-bf27-4222-8f44-f986c9119ad3" />
-</p>
+<img width="1206" height="764" alt="image" src="https://github.com/user-attachments/assets/8f9602ca-2dd6-4d91-8286-d3f02553aeee" /> 
+<img width="882" height="782" alt="image" src="https://github.com/user-attachments/assets/59d51b65-bf27-4222-8f44-f986c9119ad3" />
 
 ---
 
 ## 🏗 Architecture
 
 <p align="center">
-  <img width="1206" src="https://github.com/user-attachments/assets/adeeeeb8-e318-4d3f-b03e-7441af55ece5" />
+<img width="1206" height="1027" alt="image" src="https://github.com/user-attachments/assets/adeeeeb8-e318-4d3f-b03e-7441af55ece5" />
 </p>
 
 ---
