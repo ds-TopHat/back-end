@@ -1,18 +1,12 @@
-# 🧠 mATH+API  
+# 🧠 mATH+AI  
 ### Multimodal AI-powered Math Problem Solving Platform  
 
 > 덕성여자대학교 캡스톤 프로젝트  
 > 한이음 ICT 공모전 장려상
 <img width="1206" height="764" alt="image" src="https://github.com/user-attachments/assets/ba23505d-064b-45aa-af64-4165f25d960c" />
----
-
-## 🚀 Project Overview
-
-mATH+API는 멀티모달 AI 모델을 활용하여  
-수학 문제 이미지와 사용자 풀이 과정을 동시에 인식하고  
-단계별 풀이를 자동 생성 및 시각화하는 수학 자동 문제풀이 서비스입니다.
 
 ---
+
 ## 🏗 Architecture
 
 <p align="center">
