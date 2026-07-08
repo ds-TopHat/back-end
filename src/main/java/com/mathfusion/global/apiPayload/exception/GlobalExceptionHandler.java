@@ -24,6 +24,13 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    @ExceptionHandler(com.mathfusion.domain.ai.exception.AiJobException.class)
+    public ResponseEntity<ErrorResponse> handleAiJobException(com.mathfusion.domain.ai.exception.AiJobException e) {
+        com.mathfusion.domain.ai.exception.AiJobErrorCode errorCode = e.getErrorCode();
+        ErrorResponse response = new ErrorResponse(errorCode.getCode(), errorCode.getMessage());
+        return new ResponseEntity<>(response, errorCode.getHttpStatus());
+    }
+
     //에러 응답
     public record ErrorResponse(String code, String message){}
 }

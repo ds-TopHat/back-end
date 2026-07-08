@@ -1,71 +1,71 @@
 package com.mathfusion.domain.ai.entity;
 
-import com.mathfusion.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
-@Entity
 @Getter
-@Builder
+@Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@EntityListeners(AuditingEntityListener.class)
+@Table(name = "ai_job")
 public class AiJob {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ai_job_id")
     private Long id;
 
+    private String userEmail;
+
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false)
     private AiJobStatus status;
 
     @Lob
-    @Column(nullable = false, columnDefinition = "LONGTEXT")
-    private String downloadUrlsJson;
-
-    @Column(name = "s3_key")
-    private String s3Key;
+    @Column(columnDefinition = "TEXT", nullable = false)
+    private String requestJson;
 
     @Lob
     @Column(columnDefinition = "LONGTEXT")
     private String resultJson;
 
     @Lob
-    @Column(columnDefinition = "LONGTEXT")
+    @Column(columnDefinition = "TEXT")
     private String errorMessage;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    private int retryCount;
 
-    @CreatedDate
-    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
+    private LocalDateTime startedAt;
+    private LocalDateTime finishedAt;
 
-    @LastModifiedDate
-    @Column(nullable = false)
-    private LocalDateTime updatedAt;
-
-    public void markProcessing() {
-        this.status = AiJobStatus.PROCESSING;
-        this.errorMessage = null;
+    @Builder
+    public AiJob(String userEmail, String requestJson) {
+        this.userEmail = userEmail;
+        this.requestJson = requestJson;
+        this.status = AiJobStatus.PENDING;
+        this.retryCount = 0;
+        this.createdAt = LocalDateTime.now();
     }
 
-    public void markDone(String resultJson) {
+    public void start() {
+        this.status = AiJobStatus.PROCESSING;
+        this.startedAt = LocalDateTime.now();
+    }
+
+    public void complete(String resultJson) {
         this.status = AiJobStatus.DONE;
         this.resultJson = resultJson;
-        this.errorMessage = null;
+        this.finishedAt = LocalDateTime.now();
     }
 
-    public void markFailed(String errorMessage) {
+    public void fail(String errorMessage) {
         this.status = AiJobStatus.FAILED;
         this.errorMessage = errorMessage;
+        this.finishedAt = LocalDateTime.now();
+    }
+
+    public void increaseRetryCount() {
+        this.retryCount++;
     }
 }
