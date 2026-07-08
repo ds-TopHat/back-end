@@ -37,7 +37,7 @@ public class User implements UserDetails {
     @Column(unique = true, nullable = false)
     private String email;
 
-    @Column(nullable = false)
+    @Column(nullable = true) // 소셜로그인은 password 필요없음.
     private String password;
 
     // +

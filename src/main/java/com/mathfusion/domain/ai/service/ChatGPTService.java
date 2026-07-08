@@ -23,7 +23,10 @@ public class ChatGPTService {
 
     private final ChatGPTConfig chatGPTConfig;
     private final RestTemplate restTemplate;
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper() {{
+        configure(com.fasterxml.jackson.core.JsonParser.Feature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER, true);
+        configure(com.fasterxml.jackson.core.JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
+    }};
 
     @Value("${openai.model}")
     private String model;

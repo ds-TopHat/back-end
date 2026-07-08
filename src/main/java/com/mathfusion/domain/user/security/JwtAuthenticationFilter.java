@@ -13,6 +13,7 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 
 @RequiredArgsConstructor
@@ -44,13 +45,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/api/auth/kakao/**"
     );
 
-    //
-    private void setCorsHeaders(HttpServletResponse response) {
-        response.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
+    //cors에러 배포 서버 허용
+    private void setCorsHeaders(HttpServletRequest request, HttpServletResponse response) {
+        String origin = request.getHeader("Origin");
+
+        List<String> allowedOrigins = List.of(
+                "http://localhost:5173",
+                "https://topmapi.duckdns.org",
+                "https://tophatmapi.duckdns.org",
+                "https://ds-tophat.vercel.app"
+        );
+
+        if (origin != null && allowedOrigins.contains(origin)) {
+            response.setHeader("Access-Control-Allow-Origin", origin);
+            response.setHeader("Vary", "Origin"); // 캐시 문제 방지
+        }
+
         response.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+        response.setHeader("Access-Control-Allow-Headers", "*");
         response.setHeader("Access-Control-Allow-Credentials", "true");
     }
-
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
@@ -62,7 +76,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // 토큰이 아예 없는 경우
             if (token == null) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                setCorsHeaders(response); //cors에러 처리
+                setCorsHeaders(request, response); //cors에러 처리
                 response.setContentType("application/json;charset=UTF-8");
                 response.getWriter().write("{\"code\":\"401\",\"message\":\"JWT 토큰이 없습니다.\"}");
                 return;
@@ -71,7 +85,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // 토큰이 유효하지 않은 경우
             if (!tokenProvider.validateToken(token)) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                setCorsHeaders(response); //cors에러 처리
+                setCorsHeaders(request, response); //cors에러 처리
                 response.setContentType("application/json;charset=UTF-8");
                 response.getWriter().write("{\"code\":\"401\",\"message\":\"유효하지 않은 토큰입니다.\"}");
                 return;
@@ -83,7 +97,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            setCorsHeaders(response);
+            setCorsHeaders(request, response);
             response.setContentType("application/json;charset=UTF-8");
             response.getWriter().write("{\"code\":\"401\",\"message\":\"유효하지 않은 토큰입니다.\"}");
         }
