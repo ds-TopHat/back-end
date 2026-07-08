@@ -1,7 +1,11 @@
 package com.mathfusion.domain.ai.controller;
 
+import com.mathfusion.domain.ai.dto.AiJobCreateResponse;
+import com.mathfusion.domain.ai.dto.AiJobStatusResponse;
 import com.mathfusion.domain.ai.dto.ChatRequest;
+import com.mathfusion.domain.ai.entity.AiJob;
 import com.mathfusion.domain.ai.rendering.SegmentSvgService;
+import com.mathfusion.domain.ai.service.AiJobService;
 import com.mathfusion.domain.ai.service.ChatGPTService;
 import com.mathfusion.domain.ai.service.QwenService;
 import com.mathfusion.domain.ai.service.UploadRelayService;
@@ -13,10 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -33,6 +34,7 @@ public class AiController {
     private final ChatGPTService chatGPTService;
     private final QuestionService questionService;
     private final SegmentSvgService segmentSvgService;
+    private final AiJobService aiJobService;
 
     @Operation(
             summary = "AI에 수학문제 풀이 요청",
@@ -107,5 +109,44 @@ public class AiController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Ai 처리 실패 : " + e.getMessage());
         }
+    }
+
+    @PostMapping("/jobs")
+    public ResponseEntity<AiJobCreateResponse> createAiJob(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody ChatRequest req
+    ) {
+        if (req == null) {
+            throw new com.mathfusion.domain.ai.exception.AiJobException(com.mathfusion.domain.ai.exception.AiJobErrorCode.AI_JOB_REQUEST_EMPTY);
+        }
+
+        if (req.normalized().isEmpty()) {
+            throw new com.mathfusion.domain.ai.exception.AiJobException(com.mathfusion.domain.ai.exception.AiJobErrorCode.AI_JOB_IMAGE_URL_REQUIRED);
+        }
+
+        String email = userDetails != null ? userDetails.getUsername() : "anonymous";
+        Long jobId = aiJobService.createJob(email, req);
+
+        return ResponseEntity.accepted()
+                .body(new AiJobCreateResponse(jobId, "PENDING"));
+    }
+
+    @GetMapping("/jobs/{jobId}")
+    public ResponseEntity<AiJobStatusResponse> getAiJob(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable Long jobId
+    ) {
+        if (jobId == null || jobId <= 0) {
+            throw new com.mathfusion.domain.ai.exception.AiJobException(com.mathfusion.domain.ai.exception.AiJobErrorCode.AI_JOB_INVALID_ID);
+        }
+
+        AiJob job = aiJobService.getJob(jobId);
+
+        String email = userDetails != null ? userDetails.getUsername() : "anonymous";
+        if (!job.getUserEmail().equals(email)) {
+            throw new com.mathfusion.domain.ai.exception.AiJobException(com.mathfusion.domain.ai.exception.AiJobErrorCode.AI_JOB_ACCESS_DENIED);
+        }
+
+        return ResponseEntity.ok(new AiJobStatusResponse(job));
     }
 }
